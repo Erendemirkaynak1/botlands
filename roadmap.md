@@ -356,11 +356,13 @@ Forge tabanlı temel script'ler:
 **Kabul:** Python/Node örnek botları başlatılır, logları görünür ve kapatıldığında süreç ağacı kalıntı bırakmaz.
 
 ### Aşama 3 — Monitoring ve konsol
-- [ ] CPU/RAM ölçümü
-- [ ] Çalışma süresi ve PID gösterimi
-- [ ] Log tamponu/temizleme
-- [ ] Seçili bot konsolu
-- [ ] Ölçüm ve event cleanup
+- [x] Sistem ve bot bazlı CPU/RAM ölçümü
+- [x] Çalışma süresi ve PID gösterimi
+- [x] Sınırlı canlı log tamponu
+- [x] Bot kartında canlı çıktı paneli
+- [x] Ölçüm ve event cleanup
+
+**Durum:** systeminformation ile üç saniyelik sistem/bot CPU-RAM örneklemesi, bot başına uptime, canlı log paneli ve renderer abonelik temizliği eklendi. Birden fazla botta performans ve platform doğrulaması henüz yapılmadı.
 
 **Kabul:** Birden çok bot izlenirken arayüz akıcı kalır ve kaynak kullanımı sınırlı olur.
 
