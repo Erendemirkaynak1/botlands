@@ -26,6 +26,6 @@
   },
   "dependencies": {
     "tree-kill": "^1.2.2",
-    "systeminformation": "^5.30.7"
+    "systeminformation": "^5.33.19"
   }
 }
