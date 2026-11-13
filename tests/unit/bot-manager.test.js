@@ -166,3 +166,17 @@ test("stopAll stops every tracked bot process", async (t) => {
   assert.equal(manager.getStatus(bot.id).status, "stopped");
   assert.equal(manager.getStatus(secondBot.id).status, "stopped");
 });
+
+
+test("exposes whether a child process is still tracked", async (t) => {
+  const { bot, manager } = await setup(t, ["-e", "setInterval(() => {}, 1000)"]);
+  assert.equal(manager.hasTrackedProcess(bot.id), false);
+
+  await manager.start(bot.id);
+  assert.equal(manager.hasTrackedProcess(bot.id), true);
+  assert.equal(manager.getStatus(bot.id).processTracked, true);
+
+  await manager.stop(bot.id);
+  assert.equal(manager.hasTrackedProcess(bot.id), false);
+  assert.equal(manager.getStatus(bot.id).processTracked, false);
+});
