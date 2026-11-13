@@ -97,7 +97,7 @@ export class BotManager extends EventEmitter {
     const bot = await this.loadBot(botId);
     const runtime = {
       botId, status: "starting", pid: null, startedAt: null,
-      exitCode: null, signal: null, error: null, logLines: 0,
+      exitCode: null, signal: null, error: null, logLines: 0, buffers: { stdout: "", stderr: "" },
       child: null, closePromise: null, resolveClose: null
     };
     this.processes.set(botId, runtime);
@@ -141,6 +141,7 @@ export class BotManager extends EventEmitter {
     child.once("close", (code, signal) => {
       runtime.exitCode = code;
       runtime.signal = signal;
+      this.flushLogs(runtime);
       runtime.status = runtime.status === "errored" ? "errored" : "stopped";
       runtime.child = null;
       this.publishStatus(runtime);
@@ -155,17 +156,40 @@ export class BotManager extends EventEmitter {
   }
 
   publishLog(runtime, stream, chunk) {
-    for (const line of String(chunk).split(/\r?\n/)) {
-      if (!line) continue;
-      runtime.logLines = Math.min(runtime.logLines + 1, LOG_LIMIT);
-      this.emit("log", {
-        botId: runtime.botId,
-        stream,
-        line: line.slice(0, 16_384),
-        timestamp: new Date().toISOString(),
-        sequence: runtime.logLines
-      });
+    runtime.buffers[stream] += String(chunk);
+    let newlineIndex;
+    while ((newlineIndex = runtime.buffers[stream].search(/[\\r\\n]/)) !== -1) {
+      const line = runtime.buffers[stream].slice(0, newlineIndex);
+      const delimiter = runtime.buffers[stream][newlineIndex] === "\\r"
+        && runtime.buffers[stream][newlineIndex + 1] === "\\n" ? 2 : 1;
+      runtime.buffers[stream] = runtime.buffers[stream].slice(newlineIndex + delimiter);
+      this.emitLogLine(runtime, stream, line);
     }
+    while (runtime.buffers[stream].length > 16_384) {
+      this.emitLogLine(runtime, stream, runtime.buffers[stream].slice(0, 16_384));
+      runtime.buffers[stream] = runtime.buffers[stream].slice(16_384);
+    }
+  }
+
+  flushLogs(runtime) {
+    for (const stream of ["stdout", "stderr"]) {
+      if (runtime.buffers[stream]) {
+        this.emitLogLine(runtime, stream, runtime.buffers[stream]);
+        runtime.buffers[stream] = "";
+      }
+    }
+  }
+
+  emitLogLine(runtime, stream, line) {
+    if (!line) return;
+    runtime.logLines = Math.min(runtime.logLines + 1, LOG_LIMIT);
+    this.emit("log", {
+      botId: runtime.botId,
+      stream,
+      line: line.slice(0, 16_384),
+      timestamp: new Date().toISOString(),
+      sequence: runtime.logLines
+    });
   }
 
   async stop(botId) {
