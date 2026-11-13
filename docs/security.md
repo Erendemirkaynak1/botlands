@@ -13,7 +13,7 @@ Botlands executes programs with the permissions of the current operating-system 
 
 ## IPC requirements
 
-Every privileged IPC handler validates the sender and payload. The preload exposes task-specific bot configuration and lifecycle methods rather than generic channel or command execution. Executable paths and argument arrays are passed separately to `spawn`; `shell: false` is mandatory for the standard process path. Status and log subscriptions expose only structured payloads and return unsubscribe functions.
+Every privileged IPC handler validates the sender and payload. The preload exposes task-specific bot configuration and lifecycle methods rather than generic channel or command execution. Executable paths and argument arrays are passed separately to `spawn`; `shell: false` is mandatory for the standard process path. Status and log subscriptions expose only structured payloads and return unsubscribe functions. Runtime status includes whether a child process is still tracked; configuration edits, disabling, and removal are rejected until that child has emitted its close event, even when its visible state is `errored`.
 
 ## Process execution requirements
 
