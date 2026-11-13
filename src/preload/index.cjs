@@ -4,7 +4,7 @@ const botlandsApi = Object.freeze({
   app: Object.freeze({
     getInfo: () => ipcRenderer.invoke("app:get-info")
   }),
-  bots: Object.freeze({
+  system: Object.freeze({\n    getMetrics: () => ipcRenderer.invoke("system:get-metrics"),\n    onMetrics: (callback) => {\n      if (typeof callback !== "function") throw new TypeError("callback must be a function");\n      const listener = (_event, payload) => callback(payload);\n      ipcRenderer.on("system:metrics", listener);\n      return () => ipcRenderer.removeListener("system:metrics", listener);\n    }\n  }),\n  bots: Object.freeze({
     list: () => ipcRenderer.invoke("bots:list"),
     create: (input) => ipcRenderer.invoke("bots:create", input),
     update: (id, input) => ipcRenderer.invoke("bots:update", id, input),
