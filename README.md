@@ -8,7 +8,7 @@
 
 The goal is to support programs written in different languages and technologies, including Discord and Telegram bots, web-scraping jobs, Python scripts, Node.js applications, Windows batch files, and other executable programs.
 
-> **Project status:** The initial Electron foundation and dashboard are in place. Bot configuration management and the first process lifecycle workflow are implemented. CPU/RAM monitoring, expanded platform validation, and release installers are still in development.
+> **Project status:** The initial Electron foundation and dashboard are in place. Bot configuration, process lifecycle controls, live output, and basic CPU/RAM monitoring are implemented. Expanded platform validation and release installers are still in development.
 
 ## Goals and planned features
 
@@ -29,7 +29,7 @@ The goal is to support programs written in different languages and technologies,
 | Secure bridge | Electron Preload + contextBridge | Expose a limited API to the renderer |
 | User interface | HTML5, CSS3, Vanilla JavaScript | Lightweight, readable frontend |
 | Local configuration | Node.js filesystem APIs | Atomic local JSON storage with validated bot records |
-| System metrics | Planned | CPU, memory, and process statistics in a later phase |
+| System metrics | systeminformation | System-wide and per-process CPU/RAM sampling |
 | Process tree handling | tree-kill | Process-tree termination support |
 | Packaging | Electron Forge | Application packaging and distribution |
 
@@ -105,11 +105,11 @@ npm install
 npm start
 ```
 
-The Electron shell, bot configuration workflow, and first process manager are now in the repository. Run `npm install`, `npm test`, and `npm start` to launch and test the dashboard locally. CPU/RAM monitoring is the next major milestone.
+The Electron shell, bot configuration workflow, process manager, live output, and basic resource monitoring are now in the repository. Run `npm install`, `npm test`, and `npm start` to launch and test the dashboard locally.
 
 ### Dependencies
 
-Electron 45 and Electron Forge 8 are configured as development dependencies. The process manager uses `tree-kill` to terminate process trees. Bot configuration storage uses Node.js built-in filesystem APIs.
+Electron 45 and Electron Forge 8 are configured as development dependencies. The process manager uses `tree-kill` to terminate process trees, while `systeminformation` samples system and per-process CPU/RAM usage. Bot configuration storage uses Node.js built-in filesystem APIs.
 
 Install the configured dependencies with:
 
