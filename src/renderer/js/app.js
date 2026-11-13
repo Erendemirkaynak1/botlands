@@ -258,7 +258,7 @@ function getFilteredLogs(botId, query = "") {
     ? entries.filter((entry) => formatLog(entry).toLocaleLowerCase().includes(normalized))
     : entries;
   return matching.length
-    ? matching.map(formatLog).join("\\n")
+    ? matching.map(formatLog).join("\n")
     : (entries.length ? "No log lines match this filter." : "No output yet. Start this bot to see its logs.");
 }
 
