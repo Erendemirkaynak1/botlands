@@ -12,11 +12,13 @@ permissions:
 
 jobs:
   unit-tests:
-    name: Unit tests (Node ${{ matrix.node-version }})
-    runs-on: ubuntu-latest
+    name: Unit tests (${{ matrix.os }}, Node ${{ matrix.node-version }})
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 15
     strategy:
       fail-fast: false
       matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
         node-version: ["22.17.0", "24.x"]
     steps:
       - name: Check out repository
