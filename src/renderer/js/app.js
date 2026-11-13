@@ -81,7 +81,7 @@ function renderBots() {
   const enabledCount = bots.filter((bot) => bot.enabled).length;
   document.querySelector("#total-bots").textContent = String(bots.length);
   document.querySelector("#running-bots").textContent = String(runningCount);
-  document.querySelector("#stopped-bots").textContent = String(enabledCount);
+  document.querySelector("#enabled-bots").textContent = String(enabledCount);
   document.querySelector("#list-count").textContent = `${bots.length} configured`;
   document.querySelector("#nav-bot-count").textContent = String(bots.length);
 
