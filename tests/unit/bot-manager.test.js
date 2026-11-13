@@ -148,3 +148,21 @@ test("does not launch a duplicate while an errored child is still tracked", asyn
   await assert.rejects(manager.start(bot.id), /already errored/);
   manager.processes.delete(bot.id);
 });
+
+
+test("stopAll stops every tracked bot process", async (t) => {
+  const { directory, bot, manager } = await setup(t, ["-e", "setInterval(() => {}, 1000)"]);
+  const secondBot = await manager.botStore.create({
+    name: "Second test process",
+    cwd: directory,
+    executable: process.execPath,
+    args: ["-e", "setInterval(() => {}, 1000)"]
+  });
+
+  await Promise.all([manager.start(bot.id), manager.start(secondBot.id)]);
+  const results = await manager.stopAll();
+
+  assert.equal(results.length, 2);
+  assert.equal(manager.getStatus(bot.id).status, "stopped");
+  assert.equal(manager.getStatus(secondBot.id).status, "stopped");
+});
