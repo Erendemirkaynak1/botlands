@@ -3,12 +3,12 @@ import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { BotStore } from "./storage/bot-store.js";
 import { registerBotHandlers } from "./ipc/bot-handlers.js";
-import { BotManager } from "./services/bot-manager.js";
+import { BotManager } from "./services/bot-manager.js";\nimport { ProcessMonitor } from "./services/process-monitor.js";
 
 const currentDir = fileURLToPath(new URL(".", import.meta.url));
 let mainWindow;
 
-function registerIpcHandlers(botStore, botManager) {
+function registerIpcHandlers(botStore, botManager, processMonitor) {
   ipcMain.handle("app:get-info", (event) => {
     if (!mainWindow || event.sender !== mainWindow.webContents || event.senderFrame !== event.sender.mainFrame) {
       throw new Error("Untrusted IPC sender.");
@@ -22,7 +22,7 @@ function registerIpcHandlers(botStore, botManager) {
     };
   });
 
-  registerBotHandlers(ipcMain, () => mainWindow, botStore, botManager);
+  registerBotHandlers(ipcMain, () => mainWindow, botStore, botManager, processMonitor);
 }
 
 function createMainWindow() {
@@ -76,7 +76,7 @@ app.whenReady().then(() => {
     if (isQuitting) return;
     event.preventDefault();
     isQuitting = true;
-    void botManager.stopAll().finally(() => app.quit());
+    processMonitor.stop();\n    void botManager.stopAll().finally(() => app.quit());
   });
   createMainWindow();
 
