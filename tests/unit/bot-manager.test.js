@@ -180,3 +180,40 @@ test("exposes whether a child process is still tracked", async (t) => {
   assert.equal(manager.hasTrackedProcess(bot.id), false);
   assert.equal(manager.getStatus(bot.id).processTracked, false);
 });
+
+
+test("waits for an already accepted start before stopping all processes", async (t) => {
+  const { bot, manager } = await setup(t, ["-e", "setInterval(() => {}, 1000)"]);
+  const originalList = manager.botStore.list.bind(manager.botStore);
+  let enteredList;
+  let releaseList;
+  const entered = new Promise((resolve) => { enteredList = resolve; });
+  const gate = new Promise((resolve) => { releaseList = resolve; });
+  manager.botStore.list = async () => {
+    enteredList();
+    await gate;
+    return originalList();
+  };
+
+  const starting = manager.start(bot.id);
+  await entered;
+  const stopping = manager.stopAll();
+  releaseList();
+
+  await starting;
+  const results = await stopping;
+  assert.equal(results.length, 1);
+  assert.equal(manager.getStatus(bot.id).status, "stopped");
+  assert.equal(manager.hasTrackedProcess(bot.id), false);
+});
+
+test("blocks new starts during shutdown and allows them after resume", async (t) => {
+  const { bot, manager } = await setup(t, ["-e", "setInterval(() => {}, 1000)"]);
+  manager.shuttingDown = true;
+  await assert.rejects(manager.start(bot.id), /shutting down/);
+
+  manager.resume();
+  const result = await manager.start(bot.id);
+  assert.equal(result.status, "running");
+  await manager.stop(bot.id);
+});
