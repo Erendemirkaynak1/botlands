@@ -63,6 +63,27 @@ test("rejects duplicate IDs and invalid enabled flags in persisted data", async 
   });
 });
 
+test("rejects oversized writes without replacing the existing store", async () => {
+  await withStore(async (store) => {
+    const created = await store.create(sampleBot);
+    const oversizedBot = {
+      ...created,
+      args: ["x".repeat(2048)].concat(
+        Array.from({ length: 2600 }, () => "y".repeat(2048))
+      )
+    };
+
+    await assert.rejects(
+      store.writeData({ version: 1, bots: [oversizedBot] }),
+      /maximum supported size/
+    );
+
+    const bots = await store.list();
+    assert.equal(bots.length, 1);
+    assert.equal(bots[0].id, created.id);
+  });
+});
+
 test("rejects oversized persisted configuration files", async () => {
   await withStore(async (store) => {
     await writeFile(store.filePath, "x".repeat(5 * 1024 * 1024 + 1));
