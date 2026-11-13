@@ -8,14 +8,14 @@
 
 The goal is to support programs written in different languages and technologies, including Discord and Telegram bots, web-scraping jobs, Python scripts, Node.js applications, Windows batch files, and other executable programs.
 
-> **Project status:** The initial Electron foundation and dashboard are in place. Bot configuration management is implemented. Process execution, live logs, monitoring, and release installers are still in development.
+> **Project status:** The initial Electron foundation and dashboard are in place. Bot configuration management and the first process lifecycle workflow are implemented. CPU/RAM monitoring, expanded platform validation, and release installers are still in development.
 
 ## Goals and planned features
 
 - Add, edit, remove, and disable bot configurations.
-- Start, stop, and restart individual bots.
+- Start, stop, and restart individual bots using a shell-free process manager.
 - Display lifecycle states such as starting, running, stopped, and failed.
-- Stream standard output (stdout) and standard error (stderr) into an in-app console.
+- Stream standard output (stdout) and standard error (stderr) into each bot's live output panel.
 - Display process ID, uptime, and basic CPU/RAM usage.
 - Persist bot definitions and application preferences locally.
 - Support Windows first, while keeping Linux and macOS compatibility in scope.
@@ -30,7 +30,7 @@ The goal is to support programs written in different languages and technologies,
 | User interface | HTML5, CSS3, Vanilla JavaScript | Lightweight, readable frontend |
 | Local configuration | Node.js filesystem APIs | Atomic local JSON storage with validated bot records |
 | System metrics | Planned | CPU, memory, and process statistics in a later phase |
-| Process tree handling | Planned | Cross-platform child-process termination support |
+| Process tree handling | tree-kill | Process-tree termination support |
 | Packaging | Electron Forge | Application packaging and distribution |
 
 ## Architecture and security
@@ -105,11 +105,11 @@ npm install
 npm start
 ```
 
-The initial Electron shell and bot configuration workflow are now in the repository. Run `npm install` and `npm start` to launch the dashboard locally. Process start/stop and live monitoring are the next milestones.
+The Electron shell, bot configuration workflow, and first process manager are now in the repository. Run `npm install`, `npm test`, and `npm start` to launch and test the dashboard locally. CPU/RAM monitoring is the next major milestone.
 
 ### Dependencies
 
-Electron 45 and Electron Forge 8 are configured as development dependencies in `package.json`. Bot configuration currently uses Node.js built-in filesystem APIs, so no additional runtime package is required for the storage layer.
+Electron 45 and Electron Forge 8 are configured as development dependencies. The process manager uses `tree-kill` to terminate process trees. Bot configuration storage uses Node.js built-in filesystem APIs.
 
 Install the configured dependencies with:
 
