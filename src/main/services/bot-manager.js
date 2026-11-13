@@ -72,7 +72,7 @@ export class BotManager extends EventEmitter {
     const runtime = this.processes.get(botId);
     return runtime ? this.snapshot(runtime) : {
       botId, status: "stopped", pid: null, startedAt: null,
-      exitCode: null, signal: null, error: null
+      exitCode: null, signal: null, error: null, processTracked: false
     };
   }
 
