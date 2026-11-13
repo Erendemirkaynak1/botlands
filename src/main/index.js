@@ -1,11 +1,13 @@
 import { app, BrowserWindow, ipcMain, shell } from "electron";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
+import { BotStore } from "./storage/bot-store.js";
+import { registerBotHandlers } from "./ipc/bot-handlers.js";
 
 const currentDir = fileURLToPath(new URL(".", import.meta.url));
 let mainWindow;
 
-function registerIpcHandlers() {
+function registerIpcHandlers(botStore) {
   ipcMain.handle("app:get-info", (event) => {
     if (!mainWindow || event.sender !== mainWindow.webContents) {
       throw new Error("Untrusted IPC sender.");
@@ -18,6 +20,8 @@ function registerIpcHandlers() {
       electronVersion: process.versions.electron
     };
   });
+
+  registerBotHandlers(ipcMain, () => mainWindow, botStore);
 }
 
 function createMainWindow() {
@@ -62,7 +66,8 @@ function createMainWindow() {
 }
 
 app.whenReady().then(() => {
-  registerIpcHandlers();
+  const botStore = new BotStore(app.getPath("userData"));
+  registerIpcHandlers(botStore);
   createMainWindow();
 
   app.on("activate", () => {
