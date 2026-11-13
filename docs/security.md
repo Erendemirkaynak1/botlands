@@ -17,7 +17,7 @@ Every privileged IPC handler validates the sender and payload. The preload expos
 
 ## Process execution requirements
 
-Before a bot starts, Botlands verifies that its working directory exists and is a directory. Executable resolution is delegated to the operating system PATH when a bare command is configured. Processes run with the current user's permissions and inherited environment. Clearly communicate that user-configured programs can access the user's files and permissions. Never claim that Botlands isolates or makes untrusted scripts safe. Process trees are terminated on stop and when the application exits.
+Before a bot starts, Botlands verifies that its working directory exists and is a directory. Executable resolution is delegated to the operating system PATH when a bare command is configured. Processes run with the current user's permissions and inherited environment. Clearly communicate that user-configured programs can access the user's files and permissions. Never claim that Botlands isolates or makes untrusted scripts safe. Process trees are terminated on stop and when the application exits. Shutdown escalates from a graceful signal to a forced kill; if the child process does not close within the timeout, Botlands reports the failure instead of treating it as stopped. Operating-system and process-state edge cases still require validation on each supported platform.
 
 ## Secrets
 
