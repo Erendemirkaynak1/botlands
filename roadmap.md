@@ -407,3 +407,66 @@ Testlerde gerçek bot token'ı veya kişisel secret kullanılmaz.
 6. Bot Manager state machine ve süreç adapter'ını geliştir.
 7. Renderer dashboard, bot kartları, editör ve terminal görünümünü bağla.
 8. Metrics, platform testleri ve Forge release pipeline'ını tamamla.
+
+---
+
+## 13. Güncel geliştirme yol haritası
+
+Bu bölüm, mevcut dashboard ve süreç yönetimi temelinin üzerine yapılacak işleri öncelik sırasına koyar. Maddeler tamamlanıp depoda doğrulanmadan tamamlandı olarak işaretlenmemelidir.
+
+### Öncelik 1 — Arayüz ve kullanım deneyimi
+
+- [ ] Dashboard bilgi mimarisini iyileştir: gezinme alanlarını ve ana içerik hiyerarşisini netleştir.
+- [ ] Bot kartlarını daha okunaklı hale getir: durum, çalışma süresi, PID ve kaynak kullanımını dengeli bir düzende sun.
+- [ ] Botları grup ve etiketlerle düzenleme; gruba göre filtreleme.
+- [ ] İlk kullanım deneyimi ekle: açıklayıcı boş durum, örnek bot/rehber ve kolay bot ekleme çağrısı.
+- [ ] Bot oluşturma/düzenleme formunu adım adım ve anlaşılır doğrulama mesajlarıyla iyileştir.
+- [ ] Açık/koyu tema tercihi ve sistem temasını izleme seçeneği.
+- [ ] Bildirim/toast sistemi: işlem sonucu, doğrulama hatası ve süreç hatalarını tutarlı biçimde göster.
+- [ ] Klavye ile kullanım, görünür focus, ARIA durum duyuruları ve reduced-motion desteğini uçtan uca gözden geçir.
+- [ ] Dar pencere ve küçük ekran boyutlarında taşma, kesilme ve kullanılabilirlik sorunlarını gider.
+
+### Öncelik 2 — Bot yönetimi ve log deneyimi
+
+- [ ] Bot tanımlarına ortam değişkenleri (env) desteği ekle; hassas değerleri arayüzde maskele.
+- [ ] Windows .bat/.cmd çalıştırma desteğini güvenli, platforma özel adapter ile tamamla.
+- [ ] Log seviyelerine (stdout, stderr, info, warning, error) göre filtreleme.
+- [ ] Loglarda metin arama, eşleşme sayısı ve filtreyi temizleme deneyimini geliştir.
+- [ ] Log paneline otomatik kaydırmayı aç/kapat ve duraklat/devam ettir seçenekleri ekle.
+- [ ] Bot komutunu ve çalışma dizinini güvenli biçimde kopyalama kolaylığı ekle.
+- [ ] Toplu bot başlatma/durdurma ve grup bazlı işlemler ekle; kısmi başarısızlıkları açıkça raporla.
+- [ ] Bot başına yeniden başlatma politikası ve çökme sonrası davranış ayarı ekle.
+
+### Öncelik 3 — İzleme, otomasyon ve veri yönetimi
+
+- [ ] CPU/RAM geçmişini grafiklerle göster; örnekleme ve çizim maliyetini sınırla.
+- [ ] Bot sağlık kontrolü (process alive, isteğe bağlı HTTP/TCP kontrolü) ekle.
+- [ ] Zamanlanmış başlatma/durdurma ve çalışma takvimi ekle.
+- [ ] Sistem tepsisi, küçültme ve isteğe bağlı arka planda çalışma davranışını tasarla.
+- [ ] Bot yapılandırmalarını içe/dışa aktarma ve doğrulamalı yedekleme/geri yükleme ekle.
+- [ ] Kullanıcı tercihlerini (tema, görünüm, varsayılan davranışlar) kalıcı sakla.
+- [ ] Secret saklama için işletim sistemi keychain/credential store entegrasyonunu araştırıp uygula.
+
+### Öncelik 4 — Güvenilirlik, güvenlik ve test
+
+- [ ] IPC yüzeyini, payload sınırlarını ve renderer erişimlerini yeniden denetle.
+- [ ] Path, Unicode, boşluk, uzun yol ve izin hataları için platform testleri ekle.
+- [ ] Süreç ağacı sonlandırma ve orphan process senaryolarını Windows/Linux/macOS üzerinde doğrula.
+- [ ] Hızlı start/stop/restart, aynı anda çoklu bot ve uygulama kapanışı regresyon testlerini genişlet.
+- [ ] Renderer etkileşimleri ve kritik kullanıcı akışları için otomasyon testleri ekle.
+- [ ] Erişilebilirlik ve responsive arayüz kontrollerini CI sürecine dahil et.
+- [ ] Bağımlılık ve Electron güvenlik güncellemelerini düzenli denetle.
+- [ ] CI matrisinde test ve paketleme sonuçlarını doğrula; başarısız platformları yayın öncesi engelle.
+
+### Öncelik 5 — Paketleme ve yayın kalitesi
+
+- [ ] Windows, Linux ve macOS için tekrarlanabilir paketleme yapılandırmasını tamamla.
+- [ ] Uygulama ikonu, ürün metaverisi, sürüm bilgisi ve kurulum deneyimini tamamla.
+- [ ] Otomatik release workflow'u ve sürüm notları oluştur.
+- [ ] Windows code signing ve macOS notarization yönergelerini hazırla.
+- [ ] README, kullanıcı rehberi, sorun giderme ve geliştirici dokümantasyonunu güncelle.
+- [ ] İlk kararlı sürüm öncesi temiz kurulum, yükseltme ve kaldırma senaryolarını doğrula.
+
+### Tamamlanma ilkesi
+
+Her iş, kod değişikliği depoya işlendiğinde ve ilgili otomatik kontroller/incelemeler yapıldığında tamamlandı olarak işaretlenir. Gerçek işletim sistemi davranışı veya kullanıcı arayüzü manuel doğrulaması gerektiren maddeler, bu doğrulama yapılana kadar beklemede kalır.
