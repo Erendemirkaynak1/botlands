@@ -344,12 +344,14 @@ Forge tabanlı temel script'ler:
 **Kabul:** Bot tanımları uygulama yeniden açıldığında korunur; hatalı girdiler kaydedilmez.
 
 ### Aşama 2 — Process Manager
-- [ ] Start/Stop/Restart
-- [ ] Durum makinesi ve PID takibi
-- [ ] stdout/stderr akışı
-- [ ] Spawn error ve exit code işleme
+- [x] Start/Stop/Restart
+- [x] Durum makinesi ve PID takibi
+- [x] stdout/stderr akışı
+- [x] Spawn error ve exit code işleme
 - [x] Alt süreçleri sonlandırma
 - [x] Aynı botta eşzamanlı lifecycle çağrılarını sıraya alma
+
+**Durum:** BotManager, shell:false süreç başlatma, PID/durum takibi, süreç ağacı sonlandırma, canlı stdout/stderr ve uygulama kapanışında süreçleri durdurma akışı eklendi. Otomatik testler yazıldı; GitHub Actions ve Windows/macOS/Linux gerçek ortam doğrulaması henüz teyit edilmedi.
 
 **Kabul:** Python/Node örnek botları başlatılır, logları görünür ve kapatıldığında süreç ağacı kalıntı bırakmaz.
 
