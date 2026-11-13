@@ -211,7 +211,7 @@ export class BotManager extends EventEmitter {
     this.publishStatus(runtime);
 
     if (child.pid) {
-      await terminateTree(child.pid, "SIGTERM").catch(() => child.kill("SIGTERM"));
+      await terminateTree(child.pid, "SIGTERM");
     } else {
       child.kill("SIGTERM");
     }
@@ -220,7 +220,7 @@ export class BotManager extends EventEmitter {
     if (exited) return;
 
     if (child.pid) {
-      await terminateTree(child.pid, "SIGKILL").catch(() => child.kill("SIGKILL"));
+      await terminateTree(child.pid, "SIGKILL");
     } else {
       child.kill("SIGKILL");
     }
