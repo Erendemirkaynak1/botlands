@@ -21,7 +21,7 @@ Kullanıcı, kendi bilgisayarında bulunan farklı teknolojilerle yazılmış ye
 - [x] Durum: stopped, starting, running, stopping, errored, disabled
 - [x] PID ve başlangıç zamanı
 - [x] stdout ve stderr canlı log akışı
-- [ ] Log tamponu sınırı ve temizleme/indirilebilir log
+- [x] 300 satırlık log tamponu, temizleme ve indirme
 - [x] Temel CPU ve RAM ölçümü
 - [ ] Uygulama kapanırken çalışan botlar için kullanıcı tercihi (çalışır bırak / durdur / onay sor)
 - [x] shell:false süreç başlatma ve tree-kill tabanlı süreç ağacı sonlandırma
