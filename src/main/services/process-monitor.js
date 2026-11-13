@@ -59,7 +59,6 @@ export class ProcessMonitor extends EventEmitter {
           pid: runtime.pid,
           cpuPercent: round(process?.cpu),
           memoryPercent: round(process?.mem),
-          memoryRssMb: round(process?.memRss)
         };
       });
 
