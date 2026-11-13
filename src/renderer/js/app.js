@@ -322,4 +322,5 @@ botListElement.addEventListener("click", async (event) => {
   }
 });
 
-setInterval(updateUptimes, 1000);\ninitializeDashboard();
+setInterval(updateUptimes, 1000);
+initializeDashboard();
