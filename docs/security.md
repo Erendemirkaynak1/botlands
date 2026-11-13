@@ -13,11 +13,11 @@ Botlands executes programs with the permissions of the current operating-system 
 
 ## IPC requirements
 
-Every privileged IPC handler validates the sender and payload. The preload exposes task-specific bot configuration methods rather than generic channel or command execution. Executable paths and argument arrays are stored separately; process execution is not implemented yet and must not enable shell execution globally.
+Every privileged IPC handler validates the sender and payload. The preload exposes task-specific bot configuration and lifecycle methods rather than generic channel or command execution. Executable paths and argument arrays are passed separately to `spawn`; `shell: false` is mandatory for the standard process path. Status and log subscriptions expose only structured payloads and return unsubscribe functions.
 
 ## Process execution requirements
 
-Before a bot can be started, validate its executable, working directory, arguments and environment. Clearly communicate that user-configured programs can access the user's files and permissions. Never claim that Botlands isolates or makes untrusted scripts safe.
+Before a bot starts, Botlands verifies that its working directory exists and is a directory. Executable resolution is delegated to the operating system PATH when a bare command is configured. Processes run with the current user's permissions and inherited environment. Clearly communicate that user-configured programs can access the user's files and permissions. Never claim that Botlands isolates or makes untrusted scripts safe. Process trees are terminated on stop and when the application exits.
 
 ## Secrets
 
