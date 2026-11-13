@@ -31,7 +31,7 @@ function createMainWindow() {
     title: "Botlands",
     autoHideMenuBar: true,
     webPreferences: {
-      preload: join(currentDir, "../preload/index.js"),
+      preload: join(currentDir, "../preload/index.cjs"),
       contextIsolation: true,
       nodeIntegration: false,
       sandbox: true,
