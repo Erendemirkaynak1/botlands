@@ -317,7 +317,7 @@ botListElement.addEventListener("click", async (event) => {
         anchor.href = url;
         anchor.download = `${safeName}-logs.txt`;
         anchor.click();
-        URL.revokeObjectURL(url);
+        setTimeout(() => URL.revokeObjectURL(url), 1000);
         break;
       }
       case "edit":
