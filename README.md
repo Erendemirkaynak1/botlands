@@ -28,9 +28,9 @@ The goal is to support programs written in different languages and technologies,
 | Main process | Node.js | Process management, filesystem access, and IPC |
 | Secure bridge | Electron Preload + contextBridge | Expose a limited API to the renderer |
 | User interface | HTML5, CSS3, Vanilla JavaScript | Lightweight, readable frontend |
-| Local configuration | electron-store | JSON-based bot definitions and preferences |
-| System metrics | systeminformation | CPU, memory, and process statistics |
-| Process tree handling | tree-kill | Cross-platform child-process termination support |
+| Local configuration | Node.js filesystem APIs | Atomic local JSON storage with validated bot records |
+| System metrics | Planned | CPU, memory, and process statistics in a later phase |
+| Process tree handling | Planned | Cross-platform child-process termination support |
 | Packaging | Electron Forge | Application packaging and distribution |
 
 ## Architecture and security
@@ -77,7 +77,7 @@ botlands/
 │   │       ├── path-utils.js        # Platform-aware path helpers
 │   │       └── validation.js        # Input validation
 │   ├── preload/
-│   │   └── index.js                 # contextBridge API
+│   │   └── index.cjs                # contextBridge API
 │   └── renderer/
 │       ├── index.html
 │       ├── assets/icons/
@@ -135,37 +135,19 @@ npm install
 npm start
 ```
 
-The initial Electron shell is now in the repository. Run `npm install` and `npm start` to launch the dashboard locally. Bot management features are still under development.
+The initial Electron shell and bot configuration workflow are now in the repository. Run `npm install` and `npm start` to launch the dashboard locally. Process start/stop and live monitoring are still under development.
 
-### Current dependencies
+### Dependencies
 
-Runtime dependencies:
+Electron 45 and Electron Forge 8 are configured as development dependencies in `package.json`. Bot configuration currently uses Node.js built-in filesystem APIs, so no additional runtime package is required for the storage layer.
 
-```bash
-npm install electron-store systeminformation tree-kill
-```
-
-Development dependencies:
+Install the configured dependencies with:
 
 ```bash
-npm install --save-dev electron @electron-forge/cli \
-  @electron-forge/maker-squirrel \
-  @electron-forge/maker-dmg \
-  @electron-forge/maker-deb \
-  @electron-forge/maker-zip
+npm install
 ```
 
-Suggested npm scripts for Electron Forge:
-
-```json
-{
-  "scripts": {
-    "start": "electron-forge start",
-    "package": "electron-forge package",
-    "make": "electron-forge make"
-  }
-}
-```
+This generates `package-lock.json`; keep that lockfile committed so local and CI installs use the same dependency tree.
 
 ### Build and package
 
