@@ -111,9 +111,19 @@ function renderBots() {
     );
 
     const meta = createElement("div", "bot-meta");
-    meta.textContent = runtime.pid
-      ? `PID ${runtime.pid} · Started ${new Date(runtime.startedAt ?? Date.now()).toLocaleTimeString()}`
-      : runtime.error ? runtime.error : runtime.exitCode !== null ? `Exited with code ${runtime.exitCode}` : "Not running";
+    meta.textContent = runtime.status === "starting"
+      ? "Starting process…"
+      : runtime.status === "stopping"
+        ? "Stopping process…"
+        : runtime.pid && runtime.startedAt
+          ? `PID ${runtime.pid} · Started ${new Date(runtime.startedAt).toLocaleTimeString()}`
+          : runtime.error
+            ? runtime.error
+            : runtime.exitCode !== null
+              ? `Exited with code ${runtime.exitCode}`
+              : runtime.signal
+                ? `Stopped by ${runtime.signal}`
+                : "Not running";
 
     const outputDetails = createElement("details", "bot-logs");
     const summary = createElement("summary", "", "Live output");
