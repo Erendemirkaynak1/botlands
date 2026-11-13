@@ -145,10 +145,11 @@ function renderBots() {
     meta.dataset.uptimeFor = bot.id;
     meta.textContent = formatBotMeta(runtime);
 
-    const resource = createElement("div", "bot-resource", "Waiting for resource metrics…");
+    const resource = createElement("div", "bot-resource");
     resource.dataset.resourceFor = bot.id;
     const metric = resourceMetrics.get(bot.id);
-    if (metric) resource.textContent = formatResourceMetric(metric);
+    if (metric) renderResourceMetric(resource, metric);
+    else resource.textContent = "Resource metrics will appear while this bot is running.";
 
     const outputDetails = createElement("details", "bot-logs");
     const summary = createElement("summary", "", "Live output");
@@ -184,10 +185,28 @@ function formatDuration(milliseconds) {
   return [hours, minutes, seconds].map((value) => String(value).padStart(2, "0")).join(":");
 }
 
-function formatResourceMetric(metric) {
-  const cpu = metric.cpuPercent === null ? "N/A" : `${metric.cpuPercent.toFixed(1)}%`;
-  const memory = metric.memoryPercent === null ? "N/A" : `${metric.memoryPercent.toFixed(1)}%`;
-  return `CPU ${cpu} · RAM ${memory}`;
+function renderResourceMetric(container, metric) {
+  container.replaceChildren();
+  const grid = createElement("div", "resource-grid");
+  for (const [label, value] of [["CPU", metric.cpuPercent], ["RAM", metric.memoryPercent]]) {
+    const item = createElement("div", "resource-item");
+    const heading = createElement("div", "resource-heading");
+    const amount = Number.isFinite(value) ? `${value.toFixed(1)}%` : "N/A";
+    heading.append(createElement("span", "", label), createElement("strong", "", amount));
+    const track = createElement("div", "resource-track");
+    track.setAttribute("role", "progressbar");
+    track.setAttribute("aria-label", `${label} usage`);
+    track.setAttribute("aria-valuemin", "0");
+    track.setAttribute("aria-valuemax", "100");
+    if (Number.isFinite(value)) track.setAttribute("aria-valuenow", String(Math.max(0, Math.min(100, value))));
+    const fill = createElement("span", "resource-fill");
+    fill.style.width = Number.isFinite(value) ? `${Math.max(0, Math.min(100, value))}%` : "0%";
+    if (label === "CPU" && Number.isFinite(value) && value >= 80) fill.classList.add("high");
+    track.append(fill);
+    item.append(heading, track);
+    grid.append(item);
+  }
+  container.append(grid);
 }
 
 function applyMetrics(snapshot) {
@@ -195,7 +214,7 @@ function applyMetrics(snapshot) {
   for (const metric of snapshot.bots ?? []) {
     resourceMetrics.set(metric.botId, metric);
     const element = botListElement.querySelector(`[data-resource-for="${CSS.escape(metric.botId)}"]`);
-    if (element) element.textContent = formatResourceMetric(metric);
+    if (element) renderResourceMetric(element, metric);
   }
   const cpu = snapshot.system?.cpuPercent;
   const memory = snapshot.system?.memoryPercent;
