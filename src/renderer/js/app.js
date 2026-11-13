@@ -208,11 +208,12 @@ form.addEventListener("submit", async (event) => {
   };
 
   try {
-    if (editingBotId) await window.botlands.bots.update(editingBotId, input);
+    const wasEditing = Boolean(editingBotId);
+    if (wasEditing) await window.botlands.bots.update(editingBotId, input);
     else await window.botlands.bots.create(input);
     closeDialog();
     await refreshBots();
-    showNotice(editingBotId ? "Bot configuration updated." : "Bot added to your workspace.");
+    showNotice(wasEditing ? "Bot configuration updated." : "Bot added to your workspace.");
   } catch (error) {
     formError.textContent = error.message || "Could not save this bot.";
   } finally {
