@@ -69,7 +69,7 @@ test("stops a long-running process", async (t) => {
 
 test("does not start disabled bots", async (t) => {
   const { bot, manager } = await setup(t, ["-e", "setInterval(() => {}, 1000)"]);
-  await (await manager.botStore).setEnabled(bot.id, false);
+  await manager.botStore.setEnabled(bot.id, false);
   await assert.rejects(manager.start(bot.id), /disabled/);
   assert.equal(manager.getStatus(bot.id).status, "stopped");
 });
