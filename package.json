@@ -25,6 +25,7 @@
     "electron": "^45.3.2"
   },
   "dependencies": {
-    "tree-kill": "^1.2.2"
+    "tree-kill": "^1.2.2",
+    "systeminformation": "^5.30.7"
   }
 }
