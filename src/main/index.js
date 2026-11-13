@@ -1,4 +1,4 @@
-import { app, BrowserWindow, ipcMain, shell } from "electron";
+import { app, BrowserWindow, dialog, ipcMain, shell } from "electron";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { BotStore } from "./storage/bot-store.js";
@@ -75,12 +75,64 @@ app.whenReady().then(() => {
   processMonitor.start();
 
   let isQuitting = false;
+  let shutdownInProgress = false;
+
+  async function attemptShutdown() {
+    if (shutdownInProgress) return;
+    shutdownInProgress = true;
+    processMonitor.stop();
+
+    try {
+      await botManager.stopAll();
+      isQuitting = true;
+      app.quit();
+    } catch (error) {
+      const failures = error instanceof AggregateError
+        ? error.errors.map((item) => item.message)
+        : [error.message];
+      const detail = [
+        "Some bot processes may still be running:",
+        ...failures.map((message) => `• ${message}`)
+      ].join("\\n");
+
+      try {
+        const { response } = await dialog.showMessageBox(mainWindow ?? undefined, {
+          type: "warning",
+          title: "Botlands could not stop every bot",
+          message: "One or more bot processes did not shut down cleanly.",
+          detail,
+          buttons: ["Retry stopping bots", "Quit anyway", "Keep Botlands open"],
+          defaultId: 0,
+          cancelId: 2,
+          noLink: true
+        });
+
+        if (response === 0) {
+          shutdownInProgress = false;
+          void attemptShutdown();
+          return;
+        }
+
+        if (response === 1) {
+          isQuitting = true;
+          app.quit();
+          return;
+        }
+      } catch (dialogError) {
+        console.error("Could not display the shutdown warning:", dialogError);
+      }
+
+      isQuitting = false;
+      shutdownInProgress = false;
+      processMonitor.start();
+      if (!mainWindow) createMainWindow();
+    }
+  }
+
   app.on("before-quit", (event) => {
     if (isQuitting) return;
     event.preventDefault();
-    isQuitting = true;
-    processMonitor.stop();
-    void botManager.stopAll().finally(() => app.quit());
+    void attemptShutdown();
   });
   createMainWindow();
 
