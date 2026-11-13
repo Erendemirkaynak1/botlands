@@ -135,3 +135,6 @@ h1 { margin: 12px 0 7px; color: #f0f2fa; font-size: clamp(27px, 3vw, 35px); font
   .bot-status, .bot-actions, .bot-meta, .bot-logs { grid-column: 1; grid-row: auto; }
   .bot-actions { justify-content: flex-start; }
 }
+
+.bot-resource { grid-column: 1 / -1; color: #8d9bb2; font-size: 10px; font-variant-numeric: tabular-nums; }
+.health-value { font-size: 22px; }
