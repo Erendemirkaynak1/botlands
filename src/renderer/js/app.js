@@ -161,8 +161,7 @@ function formatDuration(milliseconds) {
 function formatResourceMetric(metric) {
   const cpu = metric.cpuPercent === null ? "N/A" : `${metric.cpuPercent.toFixed(1)}%`;
   const memory = metric.memoryPercent === null ? "N/A" : `${metric.memoryPercent.toFixed(1)}%`;
-  const rss = metric.memoryRssMb === null ? "" : ` · ${metric.memoryRssMb.toFixed(1)} MB`;
-  return `CPU ${cpu} · RAM ${memory}${rss}`;
+  return `CPU ${cpu} · RAM ${memory}`;
 }
 
 function applyMetrics(snapshot) {
