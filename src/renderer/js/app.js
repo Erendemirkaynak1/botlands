@@ -128,10 +128,11 @@ function renderBots() {
     const outputDetails = createElement("details", "bot-logs");
     const summary = createElement("summary", "", "Live output");
     const clearLogsButton = actionButton("Clear output", "clear-logs", bot.id, "subtle");
+    const downloadLogsButton = actionButton("Download", "download-logs", bot.id, "subtle");
     const output = createElement("pre", "bot-log-output");
     output.dataset.logOutput = bot.id;
     output.textContent = (logs.get(bot.id) ?? []).map(formatLog).join("\n");
-    outputDetails.append(summary, clearLogsButton, output);
+    outputDetails.append(summary, clearLogsButton, downloadLogsButton, output);
 
     card.append(identity, status, actions, meta, resource, outputDetails);
     botListElement.append(card);
@@ -305,6 +306,18 @@ botListElement.addEventListener("click", async (event) => {
         logs.delete(bot.id);
         const output = button.closest(".bot-card").querySelector(".bot-log-output");
         if (output) output.textContent = "";
+        break;
+      }
+      case "download-logs": {
+        const content = (logs.get(bot.id) ?? []).map(formatLog).join("\n");
+        const blob = new Blob([content], { type: "text/plain;charset=utf-8" });
+        const url = URL.createObjectURL(blob);
+        const anchor = document.createElement("a");
+        const safeName = bot.name.replace(/[^a-z0-9_-]+/gi, "-").toLowerCase() || "bot";
+        anchor.href = url;
+        anchor.download = `${safeName}-logs.txt`;
+        anchor.click();
+        URL.revokeObjectURL(url);
         break;
       }
       case "edit":
