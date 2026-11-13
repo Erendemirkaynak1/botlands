@@ -156,10 +156,15 @@ function renderBots() {
     const summary = createElement("summary", "", "Live output");
     const clearLogsButton = actionButton("Clear output", "clear-logs", bot.id, "subtle");
     const downloadLogsButton = actionButton("Download", "download-logs", bot.id, "subtle");
+    const logSearch = createElement("input", "log-search");
+    logSearch.type = "search";
+    logSearch.placeholder = "Filter output…";
+    logSearch.setAttribute("aria-label", `Filter ${bot.name} output`);
+    logSearch.dataset.logSearch = bot.id;
     const output = createElement("pre", "bot-log-output");
     output.dataset.logOutput = bot.id;
-    output.textContent = (logs.get(bot.id) ?? []).map(formatLog).join("\n");
-    outputDetails.append(summary, clearLogsButton, downloadLogsButton, output);
+    output.textContent = getFilteredLogs(bot.id, logSearch.value);
+    outputDetails.append(summary, logSearch, clearLogsButton, downloadLogsButton, output);
 
     card.append(identity, status, actions, meta, resource, outputDetails);
     botListElement.append(card);
@@ -246,6 +251,17 @@ function formatLog(entry) {
   return `[${time}] [${entry.stream.toUpperCase()}] ${entry.line}`;
 }
 
+function getFilteredLogs(botId, query = "") {
+  const entries = logs.get(botId) ?? [];
+  const normalized = query.trim().toLocaleLowerCase();
+  const matching = normalized
+    ? entries.filter((entry) => formatLog(entry).toLocaleLowerCase().includes(normalized))
+    : entries;
+  return matching.length
+    ? matching.map(formatLog).join("\\n")
+    : (entries.length ? "No log lines match this filter." : "No output yet. Start this bot to see its logs.");
+}
+
 function appendLog(entry) {
   const entries = logs.get(entry.botId) ?? [];
   entries.push(entry);
@@ -254,7 +270,8 @@ function appendLog(entry) {
 
   const output = botListElement.querySelector(`[data-log-output="${CSS.escape(entry.botId)}"]`);
   if (output) {
-    output.textContent = entries.map(formatLog).join("\n");
+    const search = botListElement.querySelector(`[data-log-search="${CSS.escape(entry.botId)}"]`);
+    output.textContent = getFilteredLogs(entry.botId, search?.value ?? "");
     output.scrollTop = output.scrollHeight;
   }
 }
@@ -329,6 +346,13 @@ form.addEventListener("submit", async (event) => {
   }
 });
 
+botListElement.addEventListener("input", (event) => {
+  const search = event.target.closest("input[data-log-search]");
+  if (!search) return;
+  const output = botListElement.querySelector(`[data-log-output="${CSS.escape(search.dataset.logSearch)}"]`);
+  if (output) output.textContent = getFilteredLogs(search.dataset.logSearch, search.value);
+});
+
 botListElement.addEventListener("click", async (event) => {
   const button = event.target.closest("button[data-action]");
   if (!button) return;
@@ -353,7 +377,7 @@ botListElement.addEventListener("click", async (event) => {
       case "clear-logs": {
         logs.delete(bot.id);
         const output = button.closest(".bot-card").querySelector(".bot-log-output");
-        if (output) output.textContent = "";
+        if (output) output.textContent = "No output yet. Start this bot to see its logs.";
         break;
       }
       case "download-logs": {
