@@ -244,6 +244,20 @@ export class BotManager extends EventEmitter {
     const activeIds = [...this.processes.values()]
       .filter((runtime) => runtime.child && ["starting", "running", "stopping"].includes(runtime.status))
       .map((runtime) => runtime.botId);
-    await Promise.allSettled(activeIds.map((id) => this.stop(id)));
+    const results = await Promise.allSettled(activeIds.map((id) => this.stop(id)));
+    const failures = results.flatMap((result, index) => {
+      if (result.status === "fulfilled") return [];
+      const error = result.reason instanceof Error
+        ? result.reason
+        : new Error(String(result.reason));
+      return [new Error(`Failed to stop bot ${activeIds[index]}: ${error.message}`, {
+        cause: error
+      })];
+    });
+
+    if (failures.length) {
+      throw new AggregateError(failures, `${failures.length} bot process(es) could not be stopped.`);
+    }
+    return results.map((result) => result.value);
   }
 }
