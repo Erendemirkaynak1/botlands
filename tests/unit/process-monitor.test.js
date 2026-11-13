@@ -88,3 +88,35 @@ test("ignores an in-flight metrics result after monitoring stops", async () => {
   assert.equal(errorEvents, 0);
   assert.equal(monitor.getSnapshot(), null);
 });
+
+
+test("starts a fresh metrics sample after monitoring is restarted", async () => {
+  let resolveFirstLoad;
+  let loadCalls = 0;
+  const provider = {
+    currentLoad: () => {
+      loadCalls += 1;
+      if (loadCalls === 1) return new Promise((resolve) => { resolveFirstLoad = resolve; });
+      return Promise.resolve({ currentLoad: 42 });
+    },
+    mem: async () => ({ used: 25, total: 100 }),
+    processes: async () => ({ list: [] })
+  };
+  const monitor = new ProcessMonitor({ listStatuses: () => [] }, { provider, intervalMs: 60_000 });
+  monitor.start();
+  await new Promise((resolve) => setImmediate(resolve));
+  assert.equal(loadCalls, 1);
+
+  monitor.stop();
+  monitor.start();
+  for (let attempt = 0; attempt < 10 && !monitor.getSnapshot(); attempt += 1) {
+    await new Promise((resolve) => setImmediate(resolve));
+  }
+  assert.equal(loadCalls, 2);
+  assert.equal(monitor.getSnapshot()?.system.cpuPercent, 42);
+
+  resolveFirstLoad({ currentLoad: 5 });
+  await new Promise((resolve) => setImmediate(resolve));
+  assert.equal(monitor.getSnapshot()?.system.cpuPercent, 42);
+  monitor.stop();
+});
