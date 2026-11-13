@@ -130,7 +130,7 @@ function renderBots() {
     const output = createElement("pre", "bot-log-output");
     output.dataset.logOutput = bot.id;
     output.textContent = (logs.get(bot.id) ?? []).map(formatLog).join("\n");
-    outputDetails.append(summary, output);
+    outputDetails.append(summary, clearLogsButton, output);
 
     card.append(identity, status, actions, meta, resource, outputDetails);
     botListElement.append(card);
