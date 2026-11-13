@@ -264,7 +264,7 @@ form.addEventListener("submit", async (event) => {
     name: String(formData.get("name") ?? "").trim(),
     cwd: String(formData.get("cwd") ?? "").trim(),
     executable: String(formData.get("executable") ?? "").trim(),
-    args: String(formData.get("args") ?? "").split(/\r?\n/).map((arg) => arg.trim()).filter(Boolean)
+    args: String(formData.get("args") ?? "").split(/\r?\n/).filter((arg) => arg.trim().length > 0)
   };
 
   try {
