@@ -3,11 +3,12 @@ import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { BotStore } from "./storage/bot-store.js";
 import { registerBotHandlers } from "./ipc/bot-handlers.js";
+import { BotManager } from "./services/bot-manager.js";
 
 const currentDir = fileURLToPath(new URL(".", import.meta.url));
 let mainWindow;
 
-function registerIpcHandlers(botStore) {
+function registerIpcHandlers(botStore, botManager) {
   ipcMain.handle("app:get-info", (event) => {
     if (!mainWindow || event.sender !== mainWindow.webContents || event.senderFrame !== event.sender.mainFrame) {
       throw new Error("Untrusted IPC sender.");
@@ -21,7 +22,7 @@ function registerIpcHandlers(botStore) {
     };
   });
 
-  registerBotHandlers(ipcMain, () => mainWindow, botStore);
+  registerBotHandlers(ipcMain, () => mainWindow, botStore, botManager);
 }
 
 function createMainWindow() {
@@ -67,7 +68,16 @@ function createMainWindow() {
 
 app.whenReady().then(() => {
   const botStore = new BotStore(app.getPath("userData"));
-  registerIpcHandlers(botStore);
+  const botManager = new BotManager(botStore);
+  registerIpcHandlers(botStore, botManager);
+
+  let isQuitting = false;
+  app.on("before-quit", (event) => {
+    if (isQuitting) return;
+    event.preventDefault();
+    isQuitting = true;
+    void botManager.stopAll().finally(() => app.quit());
+  });
   createMainWindow();
 
   app.on("activate", () => {
