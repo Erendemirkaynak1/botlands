@@ -41,6 +41,16 @@ test("validates IDs before store access", () => {
   assert.equal(validateBotId("123e4567-e89b-12d3-a456-426614174000"), "123e4567-e89b-12d3-a456-426614174000");
 });
 
+test("preserves intentional whitespace inside command arguments", () => {
+  const bot = validateBotInput({
+    name: "Worker",
+    cwd: "/tmp",
+    executable: "node",
+    args: ["  value with spaces  ", ""]
+  });
+  assert.deepEqual(bot.args, ["  value with spaces  ", ""]);
+});
+
 test("supports partial updates without dropping omitted fields", () => {
   assert.deepEqual(validateBotInput({ enabled: false }, { partial: true }), { enabled: false });
 });
