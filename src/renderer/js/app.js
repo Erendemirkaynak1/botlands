@@ -127,6 +127,7 @@ function renderBots() {
 
     const outputDetails = createElement("details", "bot-logs");
     const summary = createElement("summary", "", "Live output");
+    const clearLogsButton = actionButton("Clear output", "clear-logs", bot.id, "subtle");
     const output = createElement("pre", "bot-log-output");
     output.dataset.logOutput = bot.id;
     output.textContent = (logs.get(bot.id) ?? []).map(formatLog).join("\n");
@@ -301,6 +302,12 @@ botListElement.addEventListener("click", async (event) => {
         await window.botlands.bots.restart(bot.id);
         showNotice(`${bot.name} restarted.`);
         break;
+      case "clear-logs": {
+        logs.delete(bot.id);
+        const output = button.closest(".bot-card").querySelector(".bot-log-output");
+        if (output) output.textContent = "";
+        break;
+      }
       case "edit":
         openDialog(bot);
         break;
