@@ -22,11 +22,11 @@ Kullanıcı, kendi bilgisayarında bulunan farklı teknolojilerle yazılmış ye
 - [x] PID ve başlangıç zamanı
 - [x] stdout ve stderr canlı log akışı
 - [ ] Log tamponu sınırı ve temizleme/indirilebilir log
-- [ ] Temel CPU ve RAM ölçümü
+- [x] Temel CPU ve RAM ölçümü
 - [ ] Uygulama kapanırken çalışan botlar için kullanıcı tercihi (çalışır bırak / durdur / onay sor)
 - [x] shell:false süreç başlatma ve tree-kill tabanlı süreç ağacı sonlandırma
 - [x] Yerel JSON tabanlı yapılandırma
-- [ ] Hata mesajları, doğrulama ve boş durum arayüzleri
+- [x] Hata mesajları, doğrulama ve boş durum arayüzleri
 
 ### MVP dışında (sonraki sürümler)
 
@@ -70,54 +70,27 @@ botlands/
 ├── src/
 │   ├── main/
 │   │   ├── index.js
-│   │   ├── ipc/
-│   │   │   ├── index.js
-│   │   │   ├── bot-handlers.js
-│   │   │   └── system-handlers.js
+│   │   ├── ipc/bot-handlers.js
 │   │   ├── services/
 │   │   │   ├── bot-manager.js
-│   │   │   ├── process-monitor.js
-│   │   │   └── log-manager.js
-│   │   ├── storage/
-│   │   │   └── bot-store.js
-│   │   └── utils/
-│   │       ├── command-parser.js
-│   │       ├── path-utils.js
-│   │       └── validation.js
-│   ├── preload/
-│   │   └── index.js
+│   │   │   └── process-monitor.js
+│   │   ├── storage/bot-store.js
+│   │   └── utils/bot-validation.js
+│   ├── preload/index.cjs
 │   └── renderer/
 │       ├── index.html
-│       ├── assets/icons/
-│       ├── css/
-│       │   ├── reset.css
-│       │   ├── variables.css
-│       │   ├── layout.css
-│       │   └── components.css
-│       └── js/
-│           ├── app.js
-│           ├── state.js
-│           ├── api.js
-│           ├── views/
-│           │   ├── dashboard.js
-│           │   ├── bot-list.js
-│           │   ├── bot-editor.js
-│           │   └── console.js
-│           └── components/
-│               ├── bot-card.js
-│               ├── status-badge.js
-│               └── modal.js
-├── tests/
-│   ├── unit/
-│   └── integration/
-├── docs/
-│   ├── architecture.md
-│   └── security.md
-├── .github/workflows/build.yml
+│       ├── css/styles.css
+│       └── js/app.js
+├── tests/unit/
+│   ├── bot-validation.test.js
+│   ├── bot-store.test.js
+│   ├── bot-manager.test.js
+│   └── process-monitor.test.js
+├── docs/architecture.md
+├── docs/security.md
+├── .github/workflows/tests.yml
 ├── forge.config.js
 ├── package.json
-├── .gitignore
-├── LICENSE
 ├── README.md
 └── roadmap.md
 ```
@@ -126,8 +99,8 @@ botlands/
 
 - **main/index.js:** BrowserWindow oluşturur, güvenlik ayarlarını yapar, servisleri başlatır.
 - **bot-manager.js:** Bot kayıtları ve child process yaşam döngüsünün tek sahibi olur.
-- **process-monitor.js:** PID bazlı CPU/RAM ölçümü ve periyodik durum güncellemesi.
-- **log-manager.js:** stdout/stderr dinleme, satır bazlı akış, tampon sınırı ve log temizleme.
+- **process-monitor.js:** Sistem ve bot bazlı CPU/RAM ölçümünü üç saniyede bir yayınlar.
+- **bot-manager.js:** stdout/stderr akışlarını satır bazında işler; Renderer son 300 log satırını tutar.
 - **bot-store.js:** Şema doğrulaması yapılmış bot kayıtlarını saklar.
 - **preload/index.cjs:** Renderer için izinli API fonksiyonlarını expose eder.
 - **renderer/js/api.js:** UI ile preload API'si arasında tek erişim noktası.
@@ -264,7 +237,6 @@ Komutu tek bir shell metni olarak saklamak yerine executable ve args ayrı tutul
 
 ### Runtime dependencies
 
-- `electron-store`: JSON tabanlı yerel ayar/bot tanımı deposu.
 - `systeminformation`: CPU, RAM ve süreç ölçümleri.
 - `tree-kill`: Alt süreç ağacını sonlandırma için yardımcı araç.
 
@@ -281,7 +253,7 @@ Kurulum komutları:
 
 ```bash
 # Runtime
-npm install electron-store systeminformation tree-kill
+npm install systeminformation tree-kill
 
 # Development / packaging
 npm install --save-dev electron @electron-forge/cli \
