@@ -158,10 +158,10 @@ export class BotManager extends EventEmitter {
   publishLog(runtime, stream, chunk) {
     runtime.buffers[stream] += String(chunk);
     let newlineIndex;
-    while ((newlineIndex = runtime.buffers[stream].search(/[\\r\\n]/)) !== -1) {
+    while ((newlineIndex = runtime.buffers[stream].search(/[\r\n]/)) !== -1) {
       const line = runtime.buffers[stream].slice(0, newlineIndex);
-      const delimiter = runtime.buffers[stream][newlineIndex] === "\\r"
-        && runtime.buffers[stream][newlineIndex + 1] === "\\n" ? 2 : 1;
+      const delimiter = runtime.buffers[stream][newlineIndex] === "\r"
+        && runtime.buffers[stream][newlineIndex + 1] === "\n" ? 2 : 1;
       runtime.buffers[stream] = runtime.buffers[stream].slice(newlineIndex + delimiter);
       this.emitLogLine(runtime, stream, line);
     }
