@@ -44,7 +44,7 @@ function renderBots() {
   document.querySelector("#total-bots").textContent = String(bots.length);
   document.querySelector("#running-bots").textContent = "0";
   document.querySelector("#stopped-bots").textContent = String(enabledCount);
-  document.querySelector("#list-count").textContent = `${bots.length} configured`;
+  document.querySelector("#list-count").textContent = `${bots.length} configured`;\n  document.querySelector("#nav-bot-count").textContent = String(bots.length);
 
   for (const bot of bots) {
     const card = createElement("article", "bot-card");
