@@ -107,3 +107,24 @@ test("reports executable launch failures", async (t) => {
   await assert.rejects(manager.start(bot.id));
   assert.equal(manager.getStatus(bot.id).status, "errored");
 });
+
+
+test("reports bot shutdown failures instead of silently ignoring them", async (t) => {
+  const { bot, manager } = await setup(t, ["-e", "setInterval(() => {}, 1000)"]);
+  manager.processes.set(bot.id, {
+    botId: bot.id,
+    status: "running",
+    child: { pid: 12345 }
+  });
+  manager.stop = async () => {
+    throw new Error("forced shutdown timed out");
+  };
+
+  await assert.rejects(manager.stopAll(), (error) => {
+    assert.ok(error instanceof AggregateError);
+    assert.match(error.message, /1 bot process/);
+    assert.match(error.errors[0].message, new RegExp(bot.id));
+    assert.match(error.errors[0].message, /forced shutdown timed out/);
+    return true;
+  });
+});
