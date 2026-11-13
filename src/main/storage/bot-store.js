@@ -7,6 +7,12 @@ const STORE_VERSION = 1;
 const MAX_STORE_BYTES = 5 * 1024 * 1024;
 const MAX_BOTS = 500;
 
+function isCanonicalTimestamp(value) {
+  if (typeof value !== "string") return false;
+  const parsed = new Date(value);
+  return Number.isFinite(parsed.getTime()) && parsed.toISOString() === value;
+}
+
 export class BotStore {
   constructor(userDataPath) {
     this.directory = userDataPath;
@@ -55,8 +61,7 @@ export class BotStore {
           args: bot.args,
           enabled: bot.enabled
         });
-        if (typeof bot.createdAt !== "string" || typeof bot.updatedAt !== "string" ||
-            !Number.isFinite(Date.parse(bot.createdAt)) || !Number.isFinite(Date.parse(bot.updatedAt))) {
+        if (!isCanonicalTimestamp(bot.createdAt) || !isCanonicalTimestamp(bot.updatedAt)) {
           throw new Error("Bot configuration file contains invalid timestamps.");
         }
         return {
