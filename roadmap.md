@@ -16,14 +16,14 @@ Kullanıcı, kendi bilgisayarında bulunan farklı teknolojilerle yazılmış ye
 ### MVP fonksiyonları
 
 - [x] Bot ekleme, düzenleme, silme ve devre dışı bırakma
-- [ ] Bot tanımı: ad, çalışma dizini, executable, argüman listesi, ortam değişkenleri
+- [ ] Bot tanımı: ad, çalışma dizini, executable, argüman listesi, ortam değişkenleri (env desteği henüz eklenmedi)
 - [x] Start / Stop / Restart
 - [x] Durum: stopped, starting, running, stopping, errored, disabled
 - [x] PID ve başlangıç zamanı
 - [x] stdout ve stderr canlı log akışı
 - [x] 300 satırlık log tamponu, temizleme ve indirme
 - [x] Temel CPU ve RAM ölçümü
-- [ ] Uygulama kapanırken çalışan botlar için kullanıcı tercihi (çalışır bırak / durdur / onay sor)
+- [x] Uygulama kapanırken botları durdurma; durdurma başarısızsa yeniden dene / yine de çık / açık kal seçenekleri
 - [x] shell:false süreç başlatma ve tree-kill tabanlı süreç ağacı sonlandırma
 - [x] Yerel JSON tabanlı yapılandırma
 - [x] Hata mesajları, doğrulama ve boş durum arayüzleri
