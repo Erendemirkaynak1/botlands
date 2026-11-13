@@ -3,7 +3,8 @@ import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { BotStore } from "./storage/bot-store.js";
 import { registerBotHandlers } from "./ipc/bot-handlers.js";
-import { BotManager } from "./services/bot-manager.js";\nimport { ProcessMonitor } from "./services/process-monitor.js";
+import { BotManager } from "./services/bot-manager.js";
+import { ProcessMonitor } from "./services/process-monitor.js";
 
 const currentDir = fileURLToPath(new URL(".", import.meta.url));
 let mainWindow;
@@ -69,14 +70,17 @@ function createMainWindow() {
 app.whenReady().then(() => {
   const botStore = new BotStore(app.getPath("userData"));
   const botManager = new BotManager(botStore);
-  registerIpcHandlers(botStore, botManager);
+  const processMonitor = new ProcessMonitor(botManager);
+  registerIpcHandlers(botStore, botManager, processMonitor);
+  processMonitor.start();
 
   let isQuitting = false;
   app.on("before-quit", (event) => {
     if (isQuitting) return;
     event.preventDefault();
     isQuitting = true;
-    processMonitor.stop();\n    void botManager.stopAll().finally(() => app.quit());
+    processMonitor.stop();
+    void botManager.stopAll().finally(() => app.quit());
   });
   createMainWindow();
 
