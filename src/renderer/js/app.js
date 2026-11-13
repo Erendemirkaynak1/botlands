@@ -90,14 +90,14 @@ function openDialog(bot = null) {
   saveButton.textContent = bot ? "Save changes" : "Save bot";
 
   if (bot) {
-    form.elements.name.value = bot.name;
-    form.elements.cwd.value = bot.cwd;
-    form.elements.executable.value = bot.executable;
+    form.elements.namedItem("name").value = bot.name;
+    form.elements.namedItem("cwd").value = bot.cwd;
+    form.elements.namedItem("executable").value = bot.executable;
     form.elements.args.value = bot.args.join("\n");
   }
 
   dialog.showModal();
-  form.elements.name.focus();
+  form.elements.namedItem("name").focus();
 }
 
 function closeDialog() {
@@ -114,7 +114,7 @@ function showError(error) {
 document.querySelector("#add-bot-button").addEventListener("click", () => openDialog());
 document.querySelector("#empty-add-button").addEventListener("click", () => openDialog());
 document.querySelector("#close-dialog").addEventListener("click", closeDialog);
-document.querySelector("#cancel-dialog").addEventListener("click", closeDialog);
+document.querySelector("#cancel-dialog").addEventListener("click", closeDialog);\n\nwindow.addEventListener("keydown", (event) => {\n  if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "k") {\n    event.preventDefault();\n    if (!dialog.open) openDialog();\n  }\n});
 
 dialog.addEventListener("click", (event) => {
   if (event.target === dialog) closeDialog();
