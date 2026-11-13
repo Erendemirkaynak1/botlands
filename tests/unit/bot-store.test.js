@@ -1,6 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { mkdtemp, rm } from "node:fs/promises";
+import { mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
+import { randomUUID } from "node:crypto";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { BotStore } from "../../src/main/storage/bot-store.js";
@@ -50,23 +51,64 @@ test("updates, disables and removes a bot", async () => {
 test("rejects duplicate IDs and invalid enabled flags in persisted data", async () => {
   await withStore(async (store) => {
     const created = await store.create(sampleBot);
-    const raw = await (await import("node:fs/promises")).readFile(store.filePath, "utf8");
+    const raw = await readFile(store.filePath, "utf8");
     const data = JSON.parse(raw);
     data.bots.push({ ...data.bots[0] });
-    await (await import("node:fs/promises")).writeFile(store.filePath, JSON.stringify(data));
+    await writeFile(store.filePath, JSON.stringify(data));
     await assert.rejects(store.list(), /duplicate bot IDs/);
 
     data.bots = [{ ...created, enabled: "yes" }];
-    await (await import("node:fs/promises")).writeFile(store.filePath, JSON.stringify(data));
+    await writeFile(store.filePath, JSON.stringify(data));
     await assert.rejects(store.list(), /invalid enabled flag/);
   });
 });
 
 test("rejects oversized persisted configuration files", async () => {
   await withStore(async (store) => {
-    const { writeFile } = await import("node:fs/promises");
     await writeFile(store.filePath, "x".repeat(5 * 1024 * 1024 + 1));
     await assert.rejects(store.list(), /maximum supported size/);
+  });
+});
+
+
+test("rejects malformed records and invalid persisted timestamps", async () => {
+  await withStore(async (store) => {
+    const created = await store.create(sampleBot);
+    const raw = await readFile(store.filePath, "utf8");
+    const data = JSON.parse(raw);
+
+    data.bots = [null];
+    await writeFile(store.filePath, JSON.stringify(data));
+    await assert.rejects(store.list(), /invalid record/);
+
+    data.bots = [{ ...created, createdAt: "not-a-date" }];
+    await writeFile(store.filePath, JSON.stringify(data));
+    await assert.rejects(store.list(), /invalid timestamps/);
+
+    data.bots = [{ ...created, updatedAt: null }];
+    await writeFile(store.filePath, JSON.stringify(data));
+    await assert.rejects(store.list(), /invalid timestamps/);
+  });
+});
+
+test("enforces the maximum number of bots before creating another record", async () => {
+  await withStore(async (store) => {
+    const created = await store.create(sampleBot);
+    const timestamp = new Date().toISOString();
+    const bots = Array.from({ length: 500 }, (_, index) => ({
+      ...created,
+      id: randomUUID(),
+      name: `Worker ${index}`,
+      createdAt: timestamp,
+      updatedAt: timestamp
+    }));
+    await writeFile(store.filePath, JSON.stringify({ version: 1, bots }));
+
+    await assert.rejects(
+      store.create(sampleBot),
+      /at most 500 bots/
+    );
+    assert.equal((await store.list()).length, 500);
   });
 });
 
