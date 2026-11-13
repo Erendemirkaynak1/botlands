@@ -79,3 +79,31 @@ test("rejects missing working directories before spawning", async (t) => {
   await manager.botStore.update(bot.id, { cwd: join(tmpdir(), "botlands-path-that-does-not-exist") });
   await assert.rejects(manager.start(bot.id), /working directory/);
 });
+
+test("serializes concurrent start requests for the same bot", async (t) => {
+  const { bot, manager } = await setup(t, ["-e", "setInterval(() => {}, 1000)"]);
+  const results = await Promise.allSettled([
+    manager.start(bot.id),
+    manager.start(bot.id)
+  ]);
+  assert.equal(results.filter((result) => result.status === "fulfilled").length, 1);
+  assert.equal(results.filter((result) => result.status === "rejected").length, 1);
+  assert.equal(manager.getStatus(bot.id).status, "running");
+});
+
+test("restarts a running process", async (t) => {
+  const { bot, manager } = await setup(t, ["-e", "setInterval(() => {}, 1000)"]);
+  const first = await manager.start(bot.id);
+  const restarted = await manager.restart(bot.id);
+  assert.equal(restarted.status, "running");
+  assert.ok(restarted.startedAt);
+  assert.ok(first.pid);
+  assert.ok(restarted.pid);
+});
+
+test("reports executable launch failures", async (t) => {
+  const { bot, manager } = await setup(t, ["-e", "process.exit(0)"]);
+  await manager.botStore.update(bot.id, { executable: "botlands-command-that-does-not-exist" });
+  await assert.rejects(manager.start(bot.id));
+  assert.equal(manager.getStatus(bot.id).status, "errored");
+});
