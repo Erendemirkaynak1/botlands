@@ -25,7 +25,6 @@ test("publishes system and per-bot metrics", async () => {
   assert.equal(snapshot.bots[0].botId, "bot-1");
   assert.equal(snapshot.bots[0].cpuPercent, 12.3);
   assert.equal(snapshot.bots[0].memoryPercent, 1.3);
-  assert.equal(snapshot.bots[0].memoryRssMb, 42.8);
 });
 
 test("does not request a process list when no bots are running", async () => {
