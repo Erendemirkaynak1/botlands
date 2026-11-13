@@ -97,6 +97,11 @@
             <div><h2>Your bots</h2><p>Manage and monitor your local processes.</p></div>
             <span class="list-count" id="list-count">0 configured</span>
           </section>
+          <div class="bot-toolbar" aria-label="Bot filters">
+            <label class="search-field"><span aria-hidden="true">⌕</span><input id="bot-search" type="search" placeholder="Search bots, commands, folders…" autocomplete="off" aria-label="Search bots" /></label>
+            <label class="filter-field"><span class="sr-only">Filter by status</span><select id="bot-status-filter" aria-label="Filter bots by status"><option value="all">All statuses</option><option value="running">Running</option><option value="stopped">Stopped</option><option value="errored">Errored</option><option value="disabled">Disabled</option></select></label>
+          </div>
+          <p class="filter-empty" id="filter-empty" hidden>No bots match your search. Try another term or status.</p>
 
           <section class="bot-list" id="bot-list" aria-live="polite"></section>
           <section class="empty-state" id="empty-state">
