@@ -13,7 +13,7 @@ test("publishes system and per-bot metrics", async () => {
     currentLoad: async () => ({ currentLoad: 23.46 }),
     mem: async () => ({ used: 400, total: 1000 }),
     processes: async () => ({
-      list: [{ pid: 123, cpu: 12.34, mem: 1.25, memRss: 42.8 }]
+      list: [{ pid: 123, cpu: 12.34, mem: 1.25 }]
     })
   };
   const monitor = new ProcessMonitor(manager, { provider });
