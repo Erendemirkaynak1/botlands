@@ -351,3 +351,19 @@ button:disabled { filter: saturate(.55); }
   html { scroll-behavior: auto; }
   *, *::before, *::after { transition-duration: .01ms !important; animation-duration: .01ms !important; }
 }
+
+
+.resource-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; max-width: 520px; }
+.resource-item { min-width: 0; }
+.resource-heading { display: flex; justify-content: space-between; gap: 8px; margin-bottom: 6px; color: #8795ad; font-size: 9px; }
+.resource-heading strong { color: #b8c4d8; font-size: 9px; font-weight: 650; font-variant-numeric: tabular-nums; }
+.resource-track { height: 5px; overflow: hidden; border-radius: 10px; background: #26334a; box-shadow: inset 0 1px 2px #0005; }
+.resource-fill { display: block; height: 100%; border-radius: inherit; background: linear-gradient(90deg, #5eaf9c, #78d9b6); transition: width .35s ease; }
+.resource-fill.high { background: linear-gradient(90deg, #d69b5f, #edbd75); }
+.bot-resource { color: #718099; font-size: 10px; }
+@media (max-width: 640px) {
+  .resource-grid { gap: 10px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .resource-fill { transition: none; }
+}
