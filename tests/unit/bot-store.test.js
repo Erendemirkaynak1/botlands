@@ -168,3 +168,15 @@ test("requires persisted timestamps to be strings", async () => {
     await assert.rejects(store.list(), /invalid timestamps/);
   });
 });
+
+
+test("rejects non-canonical but Date.parse-compatible persisted timestamps", async () => {
+  await withStore(async (store) => {
+    const created = await store.create(sampleBot);
+    const data = JSON.parse(await readFile(store.filePath, "utf8"));
+    data.bots[0].createdAt = "0";
+    data.bots[0].updatedAt = created.updatedAt;
+    await writeFile(store.filePath, JSON.stringify(data));
+    await assert.rejects(store.list(), /invalid timestamps/);
+  });
+});
