@@ -9,7 +9,7 @@ let mainWindow;
 
 function registerIpcHandlers(botStore) {
   ipcMain.handle("app:get-info", (event) => {
-    if (!mainWindow || event.sender !== mainWindow.webContents) {
+    if (!mainWindow || event.sender !== mainWindow.webContents || event.senderFrame !== event.sender.mainFrame) {
       throw new Error("Untrusted IPC sender.");
     }
 
