@@ -143,3 +143,28 @@ test("serializes concurrent writes without losing bot records", async () => {
     assert.equal((await store.list()).length, 8);
   });
 });
+
+
+test("rejects invalid top-level JSON shapes and unsupported store versions", async () => {
+  await withStore(async (store) => {
+    for (const invalid of [null, [], "invalid", { version: 2, bots: [] }, { version: 1, bots: {} }]) {
+      await writeFile(store.filePath, JSON.stringify(invalid));
+      await assert.rejects(store.list(), /unsupported format/);
+    }
+  });
+});
+
+test("requires persisted timestamps to be strings", async () => {
+  await withStore(async (store) => {
+    const created = await store.create(sampleBot);
+    const data = JSON.parse(await readFile(store.filePath, "utf8"));
+
+    data.bots[0].createdAt = 0;
+    await writeFile(store.filePath, JSON.stringify(data));
+    await assert.rejects(store.list(), /invalid timestamps/);
+
+    data.bots[0] = { ...created, updatedAt: 123456789 };
+    await writeFile(store.filePath, JSON.stringify(data));
+    await assert.rejects(store.list(), /invalid timestamps/);
+  });
+});
