@@ -367,3 +367,15 @@ button:disabled { filter: saturate(.55); }
 @media (prefers-reduced-motion: reduce) {
   .resource-fill { transition: none; }
 }
+
+
+.log-search {
+  grid-column: 1 / -1; width: 100%; min-width: 0; height: 34px;
+  padding: 0 10px; border: 1px solid #2c3a53; border-radius: 7px;
+  outline: 0; background: #0c1627; color: #dce4f2; font: inherit; font-size: 11px;
+}
+.log-search::placeholder { color: #697891; }
+.log-search:focus { border-color: #8378ff; box-shadow: 0 0 0 3px #8378ff1c; }
+.bot-logs { grid-template-columns: minmax(0, 1fr) auto auto; }
+.bot-logs summary { grid-column: 1 / -1; }
+.bot-logs .log-search { grid-column: 1 / -1; }
