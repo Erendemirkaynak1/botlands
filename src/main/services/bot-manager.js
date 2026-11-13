@@ -215,10 +215,20 @@ export class BotManager extends EventEmitter {
     }
 
     const exited = await waitForClose(runtime, this.stopTimeoutMs);
-    if (!exited) {
-      if (child.pid) await terminateTree(child.pid, "SIGKILL").catch(() => child.kill("SIGKILL"));
-      else child.kill("SIGKILL");
-      await waitForClose(runtime, FORCE_STOP_TIMEOUT_MS);
+    if (exited) return;
+
+    if (child.pid) {
+      await terminateTree(child.pid, "SIGKILL").catch(() => child.kill("SIGKILL"));
+    } else {
+      child.kill("SIGKILL");
+    }
+
+    const forceStopped = await waitForClose(runtime, FORCE_STOP_TIMEOUT_MS);
+    if (!forceStopped) {
+      // Keep the runtime in "stopping" with its child reference intact. This
+      // prevents restart/removal from pretending the old process is gone.
+      this.publishStatus(runtime);
+      throw new Error("The process did not exit after a forced shutdown. It may still be running.");
     }
   }
 
