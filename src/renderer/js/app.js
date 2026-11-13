@@ -12,6 +12,7 @@ const platformNames = { win32: "Windows", darwin: "macOS", linux: "Linux" };
 const activeStates = new Set(["starting", "running", "stopping"]);
 const statuses = new Map();
 const logs = new Map();
+const resourceMetrics = new Map();
 let bots = [];
 let editingBotId = null;
 let noticeTimer;
@@ -36,6 +37,7 @@ async function initializeDashboard() {
     renderBots();
   });
   window.botlands.bots.onLog((entry) => appendLog(entry));
+  window.botlands.system.onMetrics((snapshot) => applyMetrics(snapshot));
 
   try {
     const info = await window.botlands.app.getInfo();
@@ -132,8 +134,57 @@ function renderBots() {
     output.textContent = (logs.get(bot.id) ?? []).map(formatLog).join("\n");
     outputDetails.append(summary, output);
 
-    card.append(identity, status, actions, meta, outputDetails);
+    card.append(identity, status, actions, meta, resource, outputDetails);
     botListElement.append(card);
+  }
+}
+
+function formatBotMeta(runtime) {
+  if (runtime.status === "starting") return "Starting process…";
+  if (runtime.status === "stopping") return "Stopping process…";
+  if (runtime.pid && runtime.startedAt) {
+    return `PID ${runtime.pid} · Uptime ${formatDuration(Date.now() - Date.parse(runtime.startedAt))}`;
+  }
+  if (runtime.error) return runtime.error;
+  if (runtime.exitCode !== null) return `Exited with code ${runtime.exitCode}`;
+  if (runtime.signal) return `Stopped by ${runtime.signal}`;
+  return "Not running";
+}
+
+function formatDuration(milliseconds) {
+  const totalSeconds = Math.max(0, Math.floor(milliseconds / 1000));
+  const hours = Math.floor(totalSeconds / 3600);
+  const minutes = Math.floor((totalSeconds % 3600) / 60);
+  const seconds = totalSeconds % 60;
+  return [hours, minutes, seconds].map((value) => String(value).padStart(2, "0")).join(":");
+}
+
+function formatResourceMetric(metric) {
+  const cpu = metric.cpuPercent === null ? "N/A" : `${metric.cpuPercent.toFixed(1)}%`;
+  const memory = metric.memoryPercent === null ? "N/A" : `${metric.memoryPercent.toFixed(1)}%`;
+  const rss = metric.memoryRssMb === null ? "" : ` · ${metric.memoryRssMb.toFixed(1)} MB`;
+  return `CPU ${cpu} · RAM ${memory}${rss}`;
+}
+
+function applyMetrics(snapshot) {
+  if (!snapshot) return;
+  for (const metric of snapshot.bots ?? []) {
+    resourceMetrics.set(metric.botId, metric);
+    const element = botListElement.querySelector(`[data-resource-for="${CSS.escape(metric.botId)}"]`);
+    if (element) element.textContent = formatResourceMetric(metric);
+  }
+  const cpu = snapshot.system?.cpuPercent;
+  const memory = snapshot.system?.memoryPercent;
+  const healthValue = document.querySelector("#system-health-value");
+  const healthFoot = document.querySelector("#system-health-foot");
+  if (healthValue && cpu !== null && cpu !== undefined) healthValue.textContent = `${cpu.toFixed(0)}%`;
+  if (healthFoot && memory !== null && memory !== undefined) healthFoot.textContent = `System CPU · RAM ${memory.toFixed(0)}% used`;
+}
+
+function updateUptimes() {
+  for (const element of botListElement.querySelectorAll("[data-uptime-for]")) {
+    const runtime = statusFor(element.dataset.uptimeFor);
+    element.textContent = formatBotMeta(runtime);
   }
 }
 
@@ -275,4 +326,4 @@ botListElement.addEventListener("click", async (event) => {
   }
 });
 
-initializeDashboard();
+setInterval(updateUptimes, 1000);\ninitializeDashboard();
