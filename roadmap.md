@@ -1,4 +1,4 @@
-# UBCC — Geliştirme Yol Haritası
+# Botlands — Geliştirme Yol Haritası
 
 **Proje:** Universal Bot Control Center  
 **Depo:** [Erendemirkaynak1/botlands](https://github.com/Erendemirkaynak1/botlands)  
@@ -141,7 +141,7 @@ botlands/
 
 ```text
 Renderer UI
-   │ window.ubcc.bots.start(botId)
+   │ window.botlands.bots.start(botId)
    ▼
 Preload (contextBridge)
    │ ipcRenderer.invoke("bots:start", botId)
@@ -323,11 +323,11 @@ Forge tabanlı temel script'ler:
 ### Aşama 0 — Mimari ve proje temeli
 - [x] Ürün kapsamı ve teknoloji yığını belirlendi
 - [x] README ve roadmap hazırlandı
-- [ ] package.json ve Forge yapılandırması
-- [ ] Electron Main/Preload/Renderer iskeleti
-- [ ] CSP, IPC güvenlik kontrolleri ve temel test altyapısı
+- [x] package.json ve Forge yapılandırması
+- [x] Electron Main/Preload/Renderer iskeleti
+- [x] CSP ve temel IPC sender kontrolü\n- [ ] IPC payload doğrulaması ve temel test altyapısı
 
-**Kabul:** Uygulama boş bir güvenli pencereyle Windows/Linux/macOS geliştirme ortamında açılır.
+**Durum:** İlk Electron penceresi ve başlangıç dashboard'u depoya eklendi. Yerel ortamda Windows/Linux/macOS üzerinde çalıştırma doğrulaması henüz yapılmadı.\n\n**Kabul:** Uygulama boş bir güvenli pencereyle Windows/Linux/macOS geliştirme ortamında açılır.
 
 ### Aşama 1 — Bot kayıtları ve temel arayüz
 - [ ] Dashboard ve bot listesi
@@ -420,7 +420,7 @@ Testlerde gerçek bot token'ı veya kişisel secret kullanılmaz.
 
 1. `package.json`, `forge.config.js` ve `.gitignore` oluştur.
 2. Main process'te güvenli BrowserWindow kur.
-3. Preload'da yalnızca `window.ubcc` API'sini expose et.
+3. Preload'da yalnızca `window.botlands` API'sini expose et.
 4. IPC kanal sabitleri ve sender/payload doğrulaması ekle.
 5. Bot store şeması ve CRUD handler'larını oluştur.
 6. Bot Manager state machine ve süreç adapter'ını geliştir.
