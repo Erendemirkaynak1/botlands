@@ -1,87 +1,86 @@
-# Universal Bot Control Center (UBCC)
+# Botlands — Universal Bot Control Center
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20Linux%20%7C%20macOS-informational)
-![Status](https://img.shields.io/badge/status-planning-orange)
+![Platforms](https://img.shields.io/badge/platform-Windows%20%7C%20Linux%20%7C%20macOS-informational)
+![Project status](https://img.shields.io/badge/status-planning-orange)
 
-**Universal Bot Control Center (UBCC)**, farklı dillerde ve teknolojilerde yazılmış yerel botları ve otomasyon betiklerini tek bir masaüstü arayüzünden yönetmek için tasarlanan açık kaynaklı, çapraz platform bir uygulamadır.
+**Botlands** is an open-source, cross-platform desktop application designed to manage locally running bots, scripts, and automation tasks from one central interface.
 
-> Proje şu anda planlama/ilk mimari aşamasındadır. Bu depo henüz çalışan bir uygulama veya yayınlanmış kurulum paketi içermez.
+The goal is to support programs written in different languages and technologies, including Discord and Telegram bots, web-scraping jobs, Python scripts, Node.js applications, Windows batch files, and other executable programs.
 
-## Amaç
+> **Project status:** Planning and architecture phase. The repository does not yet contain a runnable application or release installers.
 
-Kullanıcıların kendi bilgisayarlarında bulunan Discord/Telegram botlarını, web scraping görevlerini, Python ve Node.js betiklerini, Windows batch dosyalarını ve diğer yerel çalıştırılabilir programları tek merkezden:
+## Goals and planned features
 
-- Eklemesi, düzenlemesi ve kaldırması
-- Başlatması, durdurması ve yeniden başlatması
-- Devre dışı bırakması ve durumlarını izlemesi
-- stdout/stderr çıktılarını canlı konsolda görmesi
-- CPU, RAM ve çalışma süresi gibi temel ölçümleri takip etmesi
+- Add, edit, remove, and disable bot configurations.
+- Start, stop, and restart individual bots.
+- Display lifecycle states such as starting, running, stopped, and failed.
+- Stream standard output (stdout) and standard error (stderr) into an in-app console.
+- Display process ID, uptime, and basic CPU/RAM usage.
+- Persist bot definitions and application preferences locally.
+- Support Windows first, while keeping Linux and macOS compatibility in scope.
 
-hedeflenmektedir.
+## Technology stack
 
-## Teknoloji yığını
-
-| Katman | Teknoloji | Sorumluluk |
+| Layer | Technology | Responsibility |
 | --- | --- | --- |
-| Masaüstü | Electron.js | Pencere, uygulama yaşam döngüsü ve paketleme |
-| Ana süreç | Node.js | Dosya sistemi, süreç yönetimi ve IPC |
-| Güvenli köprü | Electron Preload + contextBridge | Renderer'a yalnızca izin verilen API'leri açmak |
-| Arayüz | HTML5, CSS3, Vanilla JavaScript | Hafif, okunabilir ve framework bağımsız UI |
-| Yerel veri | electron-store (JSON tabanlı) | Bot tanımları ve kullanıcı tercihleri |
-| Sistem ölçümü | systeminformation | CPU/RAM ve süreç istatistikleri |
-| Süreç ağacı | tree-kill | Alt süreçleri platformlar arasında sonlandırmak |
-| Dağıtım | Electron Forge | Windows, Linux ve macOS paketleri |
+| Desktop runtime | Electron.js | Application lifecycle, windows, and packaging |
+| Main process | Node.js | Process management, filesystem access, and IPC |
+| Secure bridge | Electron Preload + contextBridge | Expose a limited API to the renderer |
+| User interface | HTML5, CSS3, Vanilla JavaScript | Lightweight, readable frontend |
+| Local configuration | electron-store | JSON-based bot definitions and preferences |
+| System metrics | systeminformation | CPU, memory, and process statistics |
+| Process tree handling | tree-kill | Cross-platform child-process termination support |
+| Packaging | Electron Forge | Application packaging and distribution |
 
-## Mimari ve güvenlik
+## Architecture and security
 
-Uygulama üç ana güven sınırına ayrılır:
+Botlands follows Electron's process separation model:
 
-1. **Main process:** Bot komutlarını doğrular, süreçleri başlatır/durdurur, yapılandırmayı saklar ve kaynak ölçümlerini toplar.
-2. **Preload:** `contextBridge` ile dar kapsamlı, açıkça tanımlanmış fonksiyonları Renderer'a sunar.
-3. **Renderer:** Sadece arayüzü yönetir. Node.js modüllerine, dosya sistemine veya ham IPC'ye doğrudan erişmez.
+1. **Main process:** Validates requests, owns bot processes, manages local configuration, and collects system metrics.
+2. **Preload:** Exposes a small, explicitly defined API through `contextBridge`.
+3. **Renderer:** Displays the interface and calls the exposed API. It does not access Node.js modules, the filesystem, or raw IPC directly.
 
-Güvenlik varsayılanları:
+Security defaults:
 
 - `contextIsolation: true`
 - `nodeIntegration: false`
 - `sandbox: true`
-- Yerel içerik ve kısıtlayıcı Content Security Policy
-- IPC kanal ve payload doğrulaması; her istekte beklenen pencere/sender kontrolü
-- Preload üzerinden yalnızca izin verilen fonksiyonlar; ham `ipcRenderer` API'si asla açılmaz
-- Süreç başlatırken `shell: false`; çalıştırılabilir dosya ve argümanlar ayrı alanlarda tutulur
-- Çalışma dizini, executable yolu ve ortam değişkenleri doğrulanır
-- Bot komutları kullanıcının kendi makinesinde kod çalıştırır. Uygulama, eklenen betiklerin güvenilir olduğunu varsaymaz; kullanıcıya açık uyarı gösterir.
+- `webSecurity: true`
+- A restrictive Content Security Policy and locally loaded application content.
+- IPC channel allowlisting, payload validation, and sender verification.
+- No exposure of the raw `ipcRenderer` object to the renderer.
+- Process execution uses `shell: false` by default, with executable paths and arguments kept separate.
+- Working directories, executable paths, and environment variable names are validated.
 
-**Önemli:** Bu araç yerel programları çalıştırmak için tasarlanır. Kullanıcı tarafından eklenen botlar tam kullanıcı izinleriyle çalışabilir. Güvenilmeyen kodu çalıştırmak için güvenli bir sandbox sağlamaz. Ortam değişkenleri/token'lar yerel depoda düz metin olarak saklanmamalı; ilk sürümde hassas değerler için işletim sistemi kimlik bilgisi kasası entegrasyonu değerlendirilmelidir.
+**Security notice:** Botlands launches programs on the user's own computer. A configured bot can run with the permissions of the current user. Botlands is not a security sandbox for untrusted code. Users should only run scripts they trust. Secrets and tokens should not be stored as plaintext in ordinary JSON configuration; operating-system credential storage should be considered for sensitive values.
 
-## Önerilen proje yapısı
+## Proposed project structure
 
 ```text
 botlands/
 ├── src/
 │   ├── main/
-│   │   ├── index.js                 # Electron giriş noktası ve BrowserWindow
+│   │   ├── index.js                 # Electron entry point and BrowserWindow
 │   │   ├── ipc/
-│   │   │   ├── index.js             # IPC handler kayıtları
-│   │   │   ├── bot-handlers.js      # Bot CRUD ve lifecycle kanalları
-│   │   │   └── system-handlers.js   # Sistem ölçümü kanalları
+│   │   │   ├── index.js             # Register IPC handlers
+│   │   │   ├── bot-handlers.js      # Bot CRUD and lifecycle channels
+│   │   │   └── system-handlers.js   # System metrics channels
 │   │   ├── services/
-│   │   │   ├── bot-manager.js       # Bot süreçlerinin yaşam döngüsü
-│   │   │   ├── process-monitor.js   # CPU/RAM/PID ölçümleri
-│   │   │   └── log-manager.js       # stdout/stderr akışı ve log tamponu
+│   │   │   ├── bot-manager.js       # Bot process lifecycle
+│   │   │   ├── process-monitor.js   # CPU/RAM/PID monitoring
+│   │   │   └── log-manager.js       # stdout/stderr streams and buffers
 │   │   ├── storage/
-│   │   │   └── bot-store.js         # Yerel JSON yapılandırması
+│   │   │   └── bot-store.js         # Local JSON configuration
 │   │   └── utils/
-│   │       ├── command-parser.js    # Komut/executable/argüman ayrıştırma
-│   │       ├── path-utils.js        # Platforma uygun yol yardımcıları
-│   │       └── validation.js        # Girdi doğrulama
+│   │       ├── command-parser.js    # Executable and argument handling
+│   │       ├── path-utils.js        # Platform-aware path helpers
+│   │       └── validation.js        # Input validation
 │   ├── preload/
-│   │   └── index.js                 # contextBridge API yüzeyi
+│   │   └── index.js                 # contextBridge API
 │   └── renderer/
 │       ├── index.html
-│       ├── assets/
-│       │   └── icons/
+│       ├── assets/icons/
 │       ├── css/
 │       │   ├── reset.css
 │       │   ├── variables.css
@@ -90,7 +89,7 @@ botlands/
 │       └── js/
 │           ├── app.js
 │           ├── state.js
-│           ├── api.js               # window.ubcc üzerinden preload çağrıları
+│           ├── api.js               # Calls through window.botlands
 │           ├── views/
 │           │   ├── dashboard.js
 │           │   ├── bot-list.js
@@ -117,17 +116,17 @@ botlands/
 └── roadmap.md
 ```
 
-## Geliştirme ortamı
+## Development environment
 
-### Gereksinimler
+### Prerequisites
 
-- Node.js **22.17 veya üzeri** (LTS önerilir)
-- npm (Node.js ile gelir)
-- Git
-- Windows, Linux veya macOS
-- Linux dağıtımına göre Electron'un ihtiyaç duyduğu sistem kütüphaneleri
+- Node.js **22.17 or newer** (an active LTS release is recommended).
+- npm (included with Node.js).
+- Git.
+- Windows, Linux, or macOS.
+- On Linux, the system libraries required by Electron for your distribution.
 
-### Kurulum
+### Clone the repository
 
 ```bash
 git clone https://github.com/Erendemirkaynak1/botlands.git
@@ -136,17 +135,17 @@ npm install
 npm start
 ```
 
-Bu komutlar, `package.json` ve uygulama giriş dosyaları eklendikten sonra kullanılacaktır. Proje planlama aşamasında olduğundan şu anda çalıştırılabilir bir uygulama mevcut değildir.
+The install and start commands will become usable once the application entry point and `package.json` are added. Since the project is currently in the planning phase, there is no runnable application yet.
 
-### Önerilen paketler
+### Planned dependencies
 
-Üretim bağımlılıkları:
+Runtime dependencies:
 
 ```bash
 npm install electron-store systeminformation tree-kill
 ```
 
-Geliştirme bağımlılıkları:
+Development dependencies:
 
 ```bash
 npm install --save-dev electron @electron-forge/cli \
@@ -156,7 +155,7 @@ npm install --save-dev electron @electron-forge/cli \
   @electron-forge/maker-zip
 ```
 
-Electron Forge için önerilen npm script'leri:
+Suggested npm scripts for Electron Forge:
 
 ```json
 {
@@ -168,44 +167,46 @@ Electron Forge için önerilen npm script'leri:
 }
 ```
 
-### Paketleme
+### Build and package
 
 ```bash
 npm run package
 npm run make
 ```
 
-Electron Forge, yapılandırılmış maker'lara göre işletim sistemine uygun dağıtım çıktıları üretir. Windows, macOS ve Linux paketlerinin güvenilir biçimde üretilmesi için CI üzerinde her işletim sisteminde ayrı build çalıştırılması önerilir. macOS imzalama/noter onayı ve Windows kod imzalama, yayın sürecinde ayrıca yapılandırılmalıdır.
+Electron Forge creates distribution artifacts using the configured makers. For reliable Windows, Linux, and macOS releases, builds should run on matching operating-system runners in CI. Windows code signing and macOS signing/notarization should be configured as part of the release process.
 
-## Kullanım akışı (hedeflenen)
+## Planned application workflow
 
-1. Kullanıcı bot adı, çalışma dizini, executable, argümanlar ve ortam değişkenlerini tanımlar.
-2. Main process girdileri doğrular ve bot tanımını yerel depoya kaydeder.
-3. Başlatma isteği IPC üzerinden Main process'e iletilir.
-4. Bot Manager, süreç için `spawn(executable, args, { cwd, env, shell: false })` kullanır.
-5. stdout/stderr olayları güvenli IPC kanallarıyla arayüze aktarılır.
-6. Monitor, PID üzerinden kaynak kullanımını toplar ve durum güncellemelerini yayınlar.
-7. Durdurma/yeniden başlatma sırasında süreç ağacı platforma uygun biçimde yönetilir.
+1. The user enters a bot name, working directory, executable, argument list, and environment variables.
+2. The Main process validates the configuration and saves it locally.
+3. A start request is sent to the Main process through a validated IPC handler.
+4. Bot Manager launches the program using an argument array, for example `spawn(executable, args, { cwd, env, shell: false })`.
+5. stdout and stderr are streamed to the UI through approved IPC events.
+6. The process monitor collects metrics and publishes status updates.
+7. Stop and restart operations handle the process tree using platform-aware logic.
 
-## Platform notları
+## Cross-platform considerations
 
-- **Windows:** `.exe`, `.cmd` ve `.bat` çalıştırma davranışları birbirinden farklıdır. Batch dosyaları için açıkça tanımlanmış Windows adapter'ı kullanılmalı; shell üzerinden çalıştırma gerektiğinde argüman kaçışlama ve güvenlik sınırları ayrıca ele alınmalıdır.
-- **Linux/macOS:** Çalıştırılabilir dosya izinleri, sinyaller ve süreç grupları dikkate alınmalıdır.
-- Çocuk süreçleri başlatan botlarda yalnızca ana PID'yi öldürmek yeterli olmayabilir. Süreç ağacının sonlandırılması ve kapanma zaman aşımı test edilmelidir.
-- `python` gibi komutlar PATH üzerinden çözülebilir; kullanıcıya seçilen executable'ın çözümlenen yolu gösterilmelidir.
+- **Windows:** `.exe`, `.cmd`, and `.bat` have different execution behavior. Batch files need an explicit Windows-specific adapter. If shell execution is unavoidable, it must be isolated and carefully validated rather than enabling `shell: true` globally.
+- **Linux and macOS:** Executable permissions, signals, and process groups must be handled correctly.
+- Bots that spawn child processes may leave descendants running if only the parent PID is terminated. Process-tree shutdown and timeout behavior must be tested.
+- Commands such as `python` may be resolved through PATH. The UI should make the resolved executable clear to the user.
 
-## Katkı ve lisans
+## Contributing
 
-Katkılar memnuniyetle karşılanır. Büyük değişikliklerden önce bir issue açarak öneriyi tartışın. Kod katkılarında okunabilirlik, platform testleri ve güvenlik kontrolleri önceliklidir.
+Contributions are welcome. For significant changes, open an issue first to discuss the proposal. Code contributions should prioritize readability, security, and tests on supported operating systems.
 
-Bu proje MIT lisansı ile dağıtılır. Ayrıntılar için [LICENSE](LICENSE) dosyasına bakın.
+## License
 
-## Teknik kaynaklar
+Botlands is distributed under the MIT License. See [LICENSE](LICENSE) for details.
+
+## Technical references
 
 - [Electron Security](https://www.electronjs.org/docs/latest/tutorial/security)
 - [Electron Process Model](https://www.electronjs.org/docs/latest/tutorial/process-model)
 - [Electron Forge](https://www.electronforge.io/)
 - [Node.js child_process](https://nodejs.org/api/child_process.html)
-- [systeminformation](https://www.npmjs.com/package/systeminformation)
-- [electron-store](https://www.npmjs.com/package/electron-store)
-- [tree-kill](https://www.npmjs.com/package/tree-kill)
+- [electron-store](https://github.com/sindresorhus/electron-store)
+- [systeminformation](https://github.com/sebhildebrandt/systeminformation)
+- [tree-kill](https://github.com/pkrumins/node-tree-kill)
