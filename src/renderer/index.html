@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; font-src 'self'; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-src 'none'"
+    />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#0b1020" />
+    <meta name="description" content="Botlands — one place to manage your local bots and automation." />
+    <title>Botlands — Control Center</title>
+    <link rel="stylesheet" href="./css/styles.css" />
+    <script type="module" src="./js/app.js"></script>
+  </head>
+  <body>
+    <div class="app-shell">
+      <aside class="sidebar">
+        <a class="brand" href="#" aria-label="Botlands home">
+          <span class="brand-mark">B</span>
+          <span class="brand-name">botlands<span class="brand-period">.</span></span>
+        </a>
+
+        <div class="workspace-label">WORKSPACE</div>
+        <nav class="navigation" aria-label="Main navigation">
+          <a class="nav-link active" href="#overview" aria-current="page">
+            <span class="nav-icon">◫</span><span>Overview</span>
+          </a>
+          <a class="nav-link disabled" href="#bots" aria-disabled="true">
+            <span class="nav-icon">⌘</span><span>My bots</span><span class="nav-count">0</span>
+          </a>
+          <a class="nav-link disabled" href="#activity" aria-disabled="true">
+            <span class="nav-icon">≋</span><span>Activity</span>
+          </a>
+        </nav>
+
+        <div class="sidebar-bottom">
+          <div class="sidebar-note">
+            <span class="note-indicator"></span>
+            <div><strong>Local workspace</strong><small>Your processes stay on this device.</small></div>
+          </div>
+          <div class="profile">
+            <div class="avatar">B</div>
+            <div class="profile-copy"><strong>Botlands</strong><small>Personal workspace</small></div>
+            <span class="profile-menu">···</span>
+          </div>
+        </div>
+      </aside>
+
+      <main class="main-content" id="overview">
+        <header class="topbar">
+          <div class="breadcrumb">Workspace <span>/</span> <strong>Overview</strong></div>
+          <div class="topbar-right">
+            <span class="connection"><i></i> All systems local</span>
+            <span class="version" id="app-version">Loading version…</span>
+          </div>
+        </header>
+
+        <section class="page">
+          <div class="welcome-row">
+            <div>
+              <div class="eyebrow">YOUR CONTROL CENTER</div>
+              <h1>Good to see you.</h1>
+              <p class="page-description">Everything you run, organized in one place.</p>
+            </div>
+            <button class="primary-button" type="button" disabled title="Coming in the next development phase">
+              <span>＋</span> Add a bot <kbd>⌘ K</kbd>
+            </button>
+          </div>
+
+          <div class="stats-grid" aria-label="Workspace statistics">
+            <article class="stat-card">
+              <div class="stat-top"><span>Total bots</span><span class="stat-symbol">⌘</span></div>
+              <div class="stat-value">0</div>
+              <div class="stat-foot">No configurations yet</div>
+            </article>
+            <article class="stat-card">
+              <div class="stat-top"><span>Running</span><span class="status-dot"></span></div>
+              <div class="stat-value">0</div>
+              <div class="stat-foot">Active processes</div>
+            </article>
+            <article class="stat-card">
+              <div class="stat-top"><span>Stopped</span><span class="stat-symbol muted">Ⅱ</span></div>
+              <div class="stat-value">0</div>
+              <div class="stat-foot">Waiting to be started</div>
+            </article>
+            <article class="stat-card">
+              <div class="stat-top"><span>System health</span><span class="health-symbol">✳</span></div>
+              <div class="stat-value health-value">Ready</div>
+              <div class="stat-foot">Application initialized</div>
+            </article>
+          </div>
+
+          <section class="section-heading">
+            <div><h2>Your bots</h2><p>Manage and monitor your local processes.</p></div>
+            <button class="text-button" type="button" disabled>View all <span>→</span></button>
+          </section>
+
+          <section class="empty-state">
+            <div class="empty-illustration" aria-hidden="true">
+              <div class="orbit orbit-one"></div><div class="orbit orbit-two"></div>
+              <div class="empty-core"><span>⌘</span></div>
+              <span class="orbit-node node-one"></span><span class="orbit-node node-two"></span><span class="orbit-node node-three"></span>
+            </div>
+            <h3>Your workspace is ready</h3>
+            <p>Once bot management is enabled, your bots will appear here.<br />Add a program to start building your control center.</p>
+            <button class="secondary-button" type="button" disabled>＋ Add your first bot</button>
+            <span class="coming-soon">BOT MANAGEMENT IS COMING IN THE NEXT PHASE</span>
+          </section>
+
+          <footer class="page-footer">
+            <span>Built for the things you run.</span>
+            <span>Botlands <b>·</b> <span id="platform-label">Desktop</span></span>
+          </footer>
+        </section>
+      </main>
+    </div>
+  </body>
+</html>
