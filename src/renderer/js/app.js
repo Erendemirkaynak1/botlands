@@ -45,6 +45,7 @@ async function initializeDashboard() {
     const info = await window.botlands.app.getInfo();
     versionElement.textContent = `v${info.version}`;
     platformElement.textContent = platformNames[info.platform] ?? info.platform;
+    document.querySelector("#shortcut-hint").textContent = info.platform === "darwin" ? "⌘ K" : "Ctrl K";
     document.title = `Botlands v${info.version}`;
     const [savedBots, currentStatuses] = await Promise.all([
       window.botlands.bots.list(),
