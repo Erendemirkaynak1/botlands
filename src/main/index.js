@@ -124,6 +124,7 @@ app.whenReady().then(() => {
 
       isQuitting = false;
       shutdownInProgress = false;
+      botManager.resume();
       processMonitor.start();
       if (!mainWindow) createMainWindow();
     }
