@@ -19,18 +19,22 @@ export class ProcessMonitor extends EventEmitter {
     this.timer = null;
     this.sampling = false;
     this.lastSnapshot = null;
+    this.generation = 0;
   }
 
   start() {
     if (this.timer) return;
-    void this.sample();
+    this.generation += 1;
     this.timer = setInterval(() => void this.sample(), this.intervalMs);
+    void this.sample();
     this.timer.unref?.();
   }
 
   stop() {
     if (this.timer) clearInterval(this.timer);
     this.timer = null;
+    // Ignore any provider result that arrives after monitoring has stopped.
+    this.generation += 1;
   }
 
   getSnapshot() {
@@ -40,6 +44,7 @@ export class ProcessMonitor extends EventEmitter {
   async sample() {
     if (this.sampling) return this.lastSnapshot;
     this.sampling = true;
+    const generation = this.generation;
     try {
       const active = this.botManager.listStatuses()
         .filter((item) => item.status === "running" && item.pid);
@@ -62,7 +67,7 @@ export class ProcessMonitor extends EventEmitter {
         };
       });
 
-      this.lastSnapshot = {
+      const snapshot = {
         timestamp: new Date().toISOString(),
         system: {
           cpuPercent: round(load.currentLoad),
@@ -72,10 +77,14 @@ export class ProcessMonitor extends EventEmitter {
         },
         bots
       };
+      if (generation !== this.generation) return this.lastSnapshot;
+      this.lastSnapshot = snapshot;
       this.emit("metrics", this.lastSnapshot);
       return this.lastSnapshot;
     } catch (error) {
-      this.emit("metrics-error", { message: error.message, timestamp: new Date().toISOString() });
+      if (generation === this.generation) {
+        this.emit("metrics-error", { message: error.message, timestamp: new Date().toISOString() });
+      }
       return this.lastSnapshot;
     } finally {
       this.sampling = false;
