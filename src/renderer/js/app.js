@@ -12,7 +12,8 @@ const platformNames = { win32: "Windows", darwin: "macOS", linux: "Linux" };
 const activeStates = new Set(["starting", "running", "stopping"]);
 const statuses = new Map();
 const logs = new Map();
-const resourceMetrics = new Map();\nconst unsubscribeHandlers = [];
+const resourceMetrics = new Map();
+const unsubscribeHandlers = [];
 let bots = [];
 let editingBotId = null;
 let noticeTimer;
@@ -34,10 +35,11 @@ function statusFor(botId) {
 async function initializeDashboard() {
   unsubscribeHandlers.push(window.botlands.bots.onStatus((status) => {
     statuses.set(status.botId, status);
+    if (status.status !== "running") resourceMetrics.delete(status.botId);
     renderBots();
-  });
-  window.botlands.bots.onLog((entry) => appendLog(entry));
-  window.botlands.system.onMetrics((snapshot) => applyMetrics(snapshot));
+  }));
+  unsubscribeHandlers.push(window.botlands.bots.onLog((entry) => appendLog(entry)));
+  unsubscribeHandlers.push(window.botlands.system.onMetrics((snapshot) => applyMetrics(snapshot)));
 
   try {
     const info = await window.botlands.app.getInfo();
@@ -322,5 +324,9 @@ botListElement.addEventListener("click", async (event) => {
   }
 });
 
-setInterval(updateUptimes, 1000);
+const uptimeTimer = setInterval(updateUptimes, 1000);
+window.addEventListener("pagehide", () => {
+  unsubscribeHandlers.forEach((unsubscribe) => unsubscribe());
+  clearInterval(uptimeTimer);
+}, { once: true });
 initializeDashboard();
