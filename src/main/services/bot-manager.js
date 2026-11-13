@@ -92,7 +92,10 @@ export class BotManager extends EventEmitter {
 
   async startUnlocked(botId) {
     const existing = this.processes.get(botId);
-    if (existing && ["starting", "running", "stopping"].includes(existing.status)) {
+    if (existing && (
+      existing.child
+      || ["starting", "running", "stopping"].includes(existing.status)
+    )) {
       throw new Error(`Bot is already ${existing.status}.`);
     }
 
@@ -138,7 +141,6 @@ export class BotManager extends EventEmitter {
       runtime.status = "errored";
       runtime.error = error.message;
       this.publishStatus(runtime);
-      runtime.resolveClose?.();
     });
     child.once("close", (code, signal) => {
       runtime.exitCode = code;
@@ -203,7 +205,7 @@ export class BotManager extends EventEmitter {
   }
 
   async stopUnlocked(runtime) {
-    if (!runtime?.child || !["starting", "running", "stopping"].includes(runtime.status)) return;
+    if (!runtime?.child || !["starting", "running", "stopping", "errored"].includes(runtime.status)) return;
     const child = runtime.child;
     runtime.status = "stopping";
     this.publishStatus(runtime);
@@ -242,7 +244,7 @@ export class BotManager extends EventEmitter {
 
   async stopAll() {
     const activeIds = [...this.processes.values()]
-      .filter((runtime) => runtime.child && ["starting", "running", "stopping"].includes(runtime.status))
+      .filter((runtime) => runtime.child)
       .map((runtime) => runtime.botId);
     const results = await Promise.allSettled(activeIds.map((id) => this.stop(id)));
     const failures = results.flatMap((result, index) => {
