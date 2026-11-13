@@ -73,9 +73,14 @@ export class BotStore {
 
   async writeData(data) {
     await mkdir(this.directory, { recursive: true });
+    const serialized = `${JSON.stringify(data, null, 2)}\n`;
+    if (Buffer.byteLength(serialized, "utf8") > MAX_STORE_BYTES) {
+      throw new Error("Bot configuration file exceeds the maximum supported size.");
+    }
+
     const temporaryPath = `${this.filePath}.${randomUUID()}.tmp`;
     try {
-      await writeFile(temporaryPath, `${JSON.stringify(data, null, 2)}\n`, {
+      await writeFile(temporaryPath, serialized, {
         encoding: "utf8",
         mode: 0o600,
         flag: "wx"
