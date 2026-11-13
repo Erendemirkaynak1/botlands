@@ -57,7 +57,12 @@ export function registerBotHandlers(ipcMain, getMainWindow, botStore, botManager
     return botStore.remove(id);
   });
 
-  ipcMain.handle("system:get-metrics", (event) => {\n    assertTrustedSender(event);\n    return processMonitor.getSnapshot();\n  });\n\n  ipcMain.handle("bots:get-statuses", (event) => {
+  ipcMain.handle("system:get-metrics", (event) => {
+    assertTrustedSender(event);
+    return processMonitor.getSnapshot();
+  });
+
+  ipcMain.handle("bots:get-statuses", (event) => {
     assertTrustedSender(event);
     return botManager.listStatuses();
   });
