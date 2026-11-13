@@ -325,18 +325,18 @@ Forge tabanlı temel script'ler:
 - [x] README ve roadmap hazırlandı
 - [x] package.json ve Forge yapılandırması
 - [x] Electron Main/Preload/Renderer iskeleti
-- [x] CSP ve temel IPC sender kontrolü\n- [ ] IPC payload doğrulaması ve temel test altyapısı
+- [x] CSP ve temel IPC sender kontrolü\n- [x] IPC payload doğrulaması ve temel test altyapısı
 
 **Durum:** İlk Electron penceresi ve başlangıç dashboard'u depoya eklendi. Yerel ortamda Windows/Linux/macOS üzerinde çalıştırma doğrulaması henüz yapılmadı.\n\n**Kabul:** Uygulama boş bir güvenli pencereyle Windows/Linux/macOS geliştirme ortamında açılır.
 
 ### Aşama 1 — Bot kayıtları ve temel arayüz
-- [ ] Dashboard ve bot listesi
-- [ ] Bot ekleme/düzenleme formu
-- [ ] JSON depolama ve şema doğrulama
-- [ ] Enable/Disable
-- [ ] Boş durum, hata ve form validasyonları
+- [x] Dashboard ve bot listesi
+- [x] Bot ekleme/düzenleme formu
+- [x] Yerel JSON depolama ve şema doğrulama
+- [x] Enable/Disable
+- [x] Boş durum, hata ve form validasyonları
 
-**Kabul:** Bot tanımları uygulama yeniden açıldığında korunur; hatalı girdiler kaydedilmez.
+**Durum:** Bot CRUD, yerel JSON depolama, form doğrulaması ve etkin/devre dışı bırakma akışı uygulandı. Otomatik testler eklendi; yerel masaüstü çalıştırması henüz doğrulanmadı.\n\n**Kabul:** Bot tanımları uygulama yeniden açıldığında korunur; hatalı girdiler kaydedilmez.
 
 ### Aşama 2 — Process Manager
 - [ ] Start/Stop/Restart
