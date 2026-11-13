@@ -61,3 +61,30 @@ test("emits an error event instead of crashing when metrics are unavailable", as
   assert.equal(snapshot, null);
   assert.match(error.message, /metrics unavailable/);
 });
+
+
+test("ignores an in-flight metrics result after monitoring stops", async () => {
+  let resolveLoad;
+  let resolveMemory;
+  const provider = {
+    currentLoad: () => new Promise((resolve) => { resolveLoad = resolve; }),
+    mem: () => new Promise((resolve) => { resolveMemory = resolve; }),
+    processes: async () => ({ list: [] })
+  };
+  const monitor = new ProcessMonitor({ listStatuses: () => [] }, { provider, intervalMs: 60_000 });
+  let metricsEvents = 0;
+  let errorEvents = 0;
+  monitor.on("metrics", () => { metricsEvents += 1; });
+  monitor.on("metrics-error", () => { errorEvents += 1; });
+
+  monitor.start();
+  await new Promise((resolve) => setImmediate(resolve));
+  monitor.stop();
+  resolveLoad({ currentLoad: 12 });
+  resolveMemory({ used: 20, total: 100 });
+  await new Promise((resolve) => setImmediate(resolve));
+
+  assert.equal(metricsEvents, 0);
+  assert.equal(errorEvents, 0);
+  assert.equal(monitor.getSnapshot(), null);
+});
