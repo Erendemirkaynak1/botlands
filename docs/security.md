@@ -1,0 +1,24 @@
+# Security Baseline
+
+Botlands executes programs with the permissions of the current operating-system user. It is a process manager, not a sandbox for untrusted code.
+
+## Electron defaults
+
+- `contextIsolation: true`
+- `nodeIntegration: false`
+- `sandbox: true`
+- `webSecurity: true`
+- Local renderer assets and a restrictive Content Security Policy.
+- No raw `ipcRenderer`, Node.js modules or filesystem APIs exposed to the renderer.
+
+## IPC requirements
+
+Every privileged IPC handler must validate the sender and payload. Expose task-specific methods rather than generic channel or command execution. Keep executable paths and argument arrays separate; do not enable shell execution globally.
+
+## Process execution requirements
+
+Before a bot can be started, validate its executable, working directory, arguments and environment. Clearly communicate that user-configured programs can access the user's files and permissions. Never claim that Botlands isolates or makes untrusted scripts safe.
+
+## Secrets
+
+Do not store bot tokens or credentials in ordinary plaintext configuration. A dedicated operating-system credential store is a prerequisite before adding first-class secret management.
