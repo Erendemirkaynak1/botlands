@@ -28,7 +28,8 @@ export class BotStore {
       }
       const raw = await readFile(this.filePath, "utf8");
       const data = JSON.parse(raw);
-      if (data.version !== STORE_VERSION || !Array.isArray(data.bots)) {
+      if (!data || typeof data !== "object" || Array.isArray(data) ||
+          data.version !== STORE_VERSION || !Array.isArray(data.bots)) {
         throw new Error("Bot configuration file has an unsupported format.");
       }
       if (data.bots.length > MAX_BOTS) {
@@ -54,7 +55,8 @@ export class BotStore {
           args: bot.args,
           enabled: bot.enabled
         });
-        if (!Number.isFinite(Date.parse(bot.createdAt)) || !Number.isFinite(Date.parse(bot.updatedAt))) {
+        if (typeof bot.createdAt !== "string" || typeof bot.updatedAt !== "string" ||
+            !Number.isFinite(Date.parse(bot.createdAt)) || !Number.isFinite(Date.parse(bot.updatedAt))) {
           throw new Error("Bot configuration file contains invalid timestamps.");
         }
         return {
