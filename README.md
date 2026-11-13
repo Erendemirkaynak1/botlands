@@ -2,13 +2,13 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 ![Platforms](https://img.shields.io/badge/platform-Windows%20%7C%20Linux%20%7C%20macOS-informational)
-![Project status](https://img.shields.io/badge/status-planning-orange)
+![Project status](https://img.shields.io/badge/status-in%20development-blue)
 
 **Botlands** is an open-source, cross-platform desktop application designed to manage locally running bots, scripts, and automation tasks from one central interface.
 
 The goal is to support programs written in different languages and technologies, including Discord and Telegram bots, web-scraping jobs, Python scripts, Node.js applications, Windows batch files, and other executable programs.
 
-> **Project status:** Planning and architecture phase. The repository does not yet contain a runnable application or release installers.
+> **Project status:** The initial Electron foundation and dashboard are in place. Bot configuration and process management are being developed in stages; release installers are not available yet.
 
 ## Goals and planned features
 
@@ -135,9 +135,9 @@ npm install
 npm start
 ```
 
-The install and start commands will become usable once the application entry point and `package.json` are added. Since the project is currently in the planning phase, there is no runnable application yet.
+The initial Electron shell is now in the repository. Run `npm install` and `npm start` to launch the dashboard locally. Bot management features are still under development.
 
-### Planned dependencies
+### Current dependencies
 
 Runtime dependencies:
 
