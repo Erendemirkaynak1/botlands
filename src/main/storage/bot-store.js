@@ -104,6 +104,9 @@ export class BotStore {
         updatedAt: new Date().toISOString()
       };
       const data = await this.readData();
+      if (data.bots.length >= MAX_BOTS) {
+        throw new Error(`A workspace can contain at most ${MAX_BOTS} bots.`);
+      }
       data.bots.push(bot);
       await this.writeData(data);
       return bot;
