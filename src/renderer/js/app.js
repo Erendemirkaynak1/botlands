@@ -114,7 +114,14 @@ function showError(error) {
 document.querySelector("#add-bot-button").addEventListener("click", () => openDialog());
 document.querySelector("#empty-add-button").addEventListener("click", () => openDialog());
 document.querySelector("#close-dialog").addEventListener("click", closeDialog);
-document.querySelector("#cancel-dialog").addEventListener("click", closeDialog);\n\nwindow.addEventListener("keydown", (event) => {\n  if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "k") {\n    event.preventDefault();\n    if (!dialog.open) openDialog();\n  }\n});
+document.querySelector("#cancel-dialog").addEventListener("click", closeDialog);
+
+window.addEventListener("keydown", (event) => {
+  if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "k") {
+    event.preventDefault();
+    if (!dialog.open) openDialog();
+  }
+});
 
 dialog.addEventListener("click", (event) => {
   if (event.target === dialog) closeDialog();
