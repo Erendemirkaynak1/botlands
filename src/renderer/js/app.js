@@ -12,7 +12,7 @@ const platformNames = { win32: "Windows", darwin: "macOS", linux: "Linux" };
 const activeStates = new Set(["starting", "running", "stopping"]);
 const statuses = new Map();
 const logs = new Map();
-const resourceMetrics = new Map();
+const resourceMetrics = new Map();\nconst unsubscribeHandlers = [];
 let bots = [];
 let editingBotId = null;
 let noticeTimer;
@@ -32,7 +32,7 @@ function statusFor(botId) {
 }
 
 async function initializeDashboard() {
-  window.botlands.bots.onStatus((status) => {
+  unsubscribeHandlers.push(window.botlands.bots.onStatus((status) => {
     statuses.set(status.botId, status);
     renderBots();
   });
