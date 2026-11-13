@@ -17,7 +17,7 @@ The goal is to support programs written in different languages and technologies,
 - Display lifecycle states such as starting, running, stopped, and failed.
 - Stream standard output (stdout) and standard error (stderr) into each bot's live output panel.
 - Display process ID, uptime, and basic CPU/RAM usage.
-- Persist bot definitions and application preferences locally.
+- Persist bot definitions locally between application launches.
 - Support Windows first, while keeping Linux and macOS compatibility in scope.
 
 ## Technology stack
