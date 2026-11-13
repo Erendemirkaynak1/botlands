@@ -6,7 +6,6 @@ import { validateBotId } from "../utils/bot-validation.js";
 
 const STOP_TIMEOUT_MS = 5000;
 const FORCE_STOP_TIMEOUT_MS = 3000;
-const LOG_LIMIT = 300;
 
 function terminateTree(pid, signal) {
   return new Promise((resolve, reject) => {
@@ -18,10 +17,13 @@ function terminateTree(pid, signal) {
 }
 
 function waitForClose(runtime, timeoutMs) {
-  return Promise.race([
-    runtime.closePromise.then(() => true),
-    new Promise((resolve) => setTimeout(() => resolve(false), timeoutMs))
-  ]);
+  return new Promise((resolve) => {
+    const timer = setTimeout(() => resolve(false), timeoutMs);
+    runtime.closePromise.then(() => {
+      clearTimeout(timer);
+      resolve(true);
+    });
+  });
 }
 
 export class BotManager extends EventEmitter {
@@ -182,7 +184,7 @@ export class BotManager extends EventEmitter {
 
   emitLogLine(runtime, stream, line) {
     if (!line) return;
-    runtime.logLines = Math.min(runtime.logLines + 1, LOG_LIMIT);
+    runtime.logLines += 1;
     this.emit("log", {
       botId: runtime.botId,
       stream,
@@ -207,14 +209,14 @@ export class BotManager extends EventEmitter {
     this.publishStatus(runtime);
 
     if (child.pid) {
-      await terminateTree(child.pid, "SIGTERM");
+      await terminateTree(child.pid, "SIGTERM").catch(() => child.kill("SIGTERM"));
     } else {
       child.kill("SIGTERM");
     }
 
     const exited = await waitForClose(runtime, this.stopTimeoutMs);
     if (!exited) {
-      if (child.pid) await terminateTree(child.pid, "SIGKILL");
+      if (child.pid) await terminateTree(child.pid, "SIGKILL").catch(() => child.kill("SIGKILL"));
       else child.kill("SIGKILL");
       await waitForClose(runtime, FORCE_STOP_TIMEOUT_MS);
     }
