@@ -8,7 +8,7 @@
 
 The goal is to support programs written in different languages and technologies, including Discord and Telegram bots, web-scraping jobs, Python scripts, Node.js applications, Windows batch files, and other executable programs.
 
-> **Project status:** The initial Electron foundation and dashboard are in place. Bot configuration and process management are being developed in stages; release installers are not available yet.
+> **Project status:** The initial Electron foundation and dashboard are in place. Bot configuration management is implemented. Process execution, live logs, monitoring, and release installers are still in development.
 
 ## Goals and planned features
 
@@ -55,59 +55,29 @@ Security defaults:
 
 **Security notice:** Botlands launches programs on the user's own computer. A configured bot can run with the permissions of the current user. Botlands is not a security sandbox for untrusted code. Users should only run scripts they trust. Secrets and tokens should not be stored as plaintext in ordinary JSON configuration; operating-system credential storage should be considered for sensitive values.
 
-## Proposed project structure
+## Project structure
 
 ```text
 botlands/
 ├── src/
 │   ├── main/
-│   │   ├── index.js                 # Electron entry point and BrowserWindow
-│   │   ├── ipc/
-│   │   │   ├── index.js             # Register IPC handlers
-│   │   │   ├── bot-handlers.js      # Bot CRUD and lifecycle channels
-│   │   │   └── system-handlers.js   # System metrics channels
-│   │   ├── services/
-│   │   │   ├── bot-manager.js       # Bot process lifecycle
-│   │   │   ├── process-monitor.js   # CPU/RAM/PID monitoring
-│   │   │   └── log-manager.js       # stdout/stderr streams and buffers
-│   │   ├── storage/
-│   │   │   └── bot-store.js         # Local JSON configuration
-│   │   └── utils/
-│   │       ├── command-parser.js    # Executable and argument handling
-│   │       ├── path-utils.js        # Platform-aware path helpers
-│   │       └── validation.js        # Input validation
-│   ├── preload/
-│   │   └── index.cjs                # contextBridge API
+│   │   ├── index.js
+│   │   ├── ipc/bot-handlers.js
+│   │   ├── storage/bot-store.js
+│   │   └── utils/bot-validation.js
+│   ├── preload/index.cjs
 │   └── renderer/
 │       ├── index.html
-│       ├── assets/icons/
 │       ├── css/
-│       │   ├── reset.css
-│       │   ├── variables.css
-│       │   ├── layout.css
-│       │   └── components.css
-│       └── js/
-│           ├── app.js
-│           ├── state.js
-│           ├── api.js               # Calls through window.botlands
-│           ├── views/
-│           │   ├── dashboard.js
-│           │   ├── bot-list.js
-│           │   ├── bot-editor.js
-│           │   └── console.js
-│           └── components/
-│               ├── bot-card.js
-│               ├── status-badge.js
-│               └── modal.js
-├── tests/
-│   ├── unit/
-│   └── integration/
+│       │   ├── styles.css
+│       │   └── theme.css
+│       └── js/app.js
+├── tests/unit/
+│   ├── bot-validation.test.js
+│   └── bot-store.test.js
 ├── docs/
 │   ├── architecture.md
 │   └── security.md
-├── .github/
-│   └── workflows/
-│       └── build.yml
 ├── forge.config.js
 ├── package.json
 ├── .gitignore
@@ -135,7 +105,7 @@ npm install
 npm start
 ```
 
-The initial Electron shell and bot configuration workflow are now in the repository. Run `npm install` and `npm start` to launch the dashboard locally. Process start/stop and live monitoring are still under development.
+The initial Electron shell and bot configuration workflow are now in the repository. Run `npm install` and `npm start` to launch the dashboard locally. Process start/stop and live monitoring are the next milestones.
 
 ### Dependencies
 
