@@ -30,8 +30,7 @@ export function registerBotHandlers(ipcMain, getMainWindow, botStore, botManager
   ipcMain.handle("bots:update", async (event, id, input) => {
     assertTrustedSender(event);
     validateBotId(id);
-    const status = botManager.getStatus(id);
-    if (["starting", "running", "stopping"].includes(status.status)) {
+    if (botManager.hasTrackedProcess(id)) {
       throw new Error("Stop this bot before editing its configuration.");
     }
     return botStore.update(id, input);
@@ -40,8 +39,7 @@ export function registerBotHandlers(ipcMain, getMainWindow, botStore, botManager
   ipcMain.handle("bots:set-enabled", async (event, id, enabled) => {
     assertTrustedSender(event);
     validateBotId(id);
-    const status = botManager.getStatus(id);
-    if (enabled === false && ["starting", "running", "stopping"].includes(status.status)) {
+    if (enabled === false && botManager.hasTrackedProcess(id)) {
       throw new Error("Stop this bot before disabling it.");
     }
     return botStore.setEnabled(id, enabled);
@@ -50,8 +48,7 @@ export function registerBotHandlers(ipcMain, getMainWindow, botStore, botManager
   ipcMain.handle("bots:remove", async (event, id) => {
     assertTrustedSender(event);
     validateBotId(id);
-    const status = botManager.getStatus(id);
-    if (["starting", "running", "stopping"].includes(status.status)) {
+    if (botManager.hasTrackedProcess(id)) {
       throw new Error("Stop this bot before removing it.");
     }
     return botStore.remove(id);
