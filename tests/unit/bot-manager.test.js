@@ -116,17 +116,23 @@ test("reports bot shutdown failures instead of silently ignoring them", async (t
     status: "running",
     child: { pid: 12345 }
   });
+  const originalStop = manager.stop.bind(manager);
   manager.stop = async () => {
     throw new Error("forced shutdown timed out");
   };
 
-  await assert.rejects(manager.stopAll(), (error) => {
-    assert.ok(error instanceof AggregateError);
-    assert.match(error.message, /1 bot process/);
-    assert.match(error.errors[0].message, new RegExp(bot.id));
-    assert.match(error.errors[0].message, /forced shutdown timed out/);
-    return true;
-  });
+  try {
+    await assert.rejects(manager.stopAll(), (error) => {
+      assert.ok(error instanceof AggregateError);
+      assert.match(error.message, /1 bot process/);
+      assert.match(error.errors[0].message, new RegExp(bot.id));
+      assert.match(error.errors[0].message, /forced shutdown timed out/);
+      return true;
+    });
+  } finally {
+    manager.stop = originalStop;
+    manager.processes.delete(bot.id);
+  }
 });
 
 
@@ -140,4 +146,5 @@ test("does not launch a duplicate while an errored child is still tracked", asyn
   });
 
   await assert.rejects(manager.start(bot.id), /already errored/);
+  manager.processes.delete(bot.id);
 });
