@@ -51,7 +51,7 @@ Security defaults:
 - IPC channel allowlisting, payload validation, and sender verification.
 - No exposure of the raw `ipcRenderer` object to the renderer.
 - Process execution uses `shell: false` by default, with executable paths and arguments kept separate.
-- Working directories, executable paths, and environment variable names are validated.
+- Working directories are checked before launch, and bot configuration payloads are validated.
 
 **Security notice:** Botlands launches programs on the user's own computer. A configured bot can run with the permissions of the current user. Botlands is not a security sandbox for untrusted code. Users should only run scripts they trust. Secrets and tokens should not be stored as plaintext in ordinary JSON configuration; operating-system credential storage should be considered for sensitive values.
 
@@ -130,7 +130,7 @@ Electron Forge creates distribution artifacts using the configured makers. For r
 
 ## Planned application workflow
 
-1. The user enters a bot name, working directory, executable, argument list, and environment variables.
+1. The user enters a bot name, working directory, executable, and argument list.
 2. The Main process validates the configuration and saves it locally.
 3. A start request is sent to the Main process through a validated IPC handler.
 4. Bot Manager launches the program using an argument array, for example `spawn(executable, args, { cwd, env, shell: false })`.
