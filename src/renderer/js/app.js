@@ -98,6 +98,12 @@ function renderBots() {
   document.querySelector("#total-bots").textContent = String(bots.length);
   document.querySelector("#running-bots").textContent = String(runningCount);
   document.querySelector("#enabled-bots").textContent = String(enabledCount);
+  document.querySelector(".stat-card:nth-child(1) .stat-foot").textContent =
+    bots.length === 0 ? "No configurations yet" : `${bots.length} saved configuration${bots.length === 1 ? "" : "s"}`;
+  document.querySelector(".stat-card:nth-child(2) .stat-foot").textContent =
+    `${runningCount} active process${runningCount === 1 ? "" : "es"}`;
+  document.querySelector(".stat-card:nth-child(3) .stat-foot").textContent =
+    `${enabledCount} enabled · ${bots.length - enabledCount} disabled`;
   document.querySelector("#list-count").textContent = visibleBots.length === bots.length
     ? `${bots.length} configured`
     : `${visibleBots.length} of ${bots.length} shown`;
