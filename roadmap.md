@@ -2,10 +2,10 @@
 
 **Proje:** Universal Bot Control Center  
 **Depo:** [Erendemirkaynak1/botlands](https://github.com/Erendemirkaynak1/botlands)  
-**Durum:** Planlama / Mimari başlangıç  
+**Durum:** İlk uygulama aşamaları geliştirildi  
 **Hedef:** Windows öncelikli, Linux ve macOS destekli güvenli ve modüler masaüstü bot yöneticisi.
 
-Bu belge MVP kapsamını, önerilen klasör yapısını, güvenlik sınırlarını, bağımlılıkları ve geliştirme sırasını tanımlar. Bu aşamada uygulama kodu yazılmıyor; önce mimari ve geliştirme zemini netleştiriliyor.
+Bu belge MVP kapsamını, önerilen klasör yapısını, güvenlik sınırlarını, bağımlılıkları ve geliştirme sırasını tanımlar. Mimari temel oluşturuldu; aşağıdaki işaretler depodaki mevcut uygulama durumunu gösterir.
 
 ---
 
@@ -49,7 +49,7 @@ Kullanıcı, kendi bilgisayarında bulunan farklı teknolojilerle yazılmış ye
 | Runtime | Node.js | child_process, fs, path ve sistem API'leri |
 | UI | HTML5 + CSS3 + Vanilla JS | Basit, okunabilir, framework bağımlılığı yok |
 | IPC | ipcMain/ipcRenderer + contextBridge | Dar kapsamlı, doğrulanabilir API |
-| Storage | electron-store | JSON tabanlı yerel ayarlar |
+| Storage | Node.js fs/promises | Atomik yerel JSON depolama |
 | Metrics | systeminformation | Platformlar arası sistem ve süreç ölçümleri |
 | Process tree | tree-kill + platform adaptörleri | Alt süreçleri de durdurabilmek |
 | Packaging | Electron Forge | Paketleme ve maker entegrasyonu |
@@ -129,7 +129,7 @@ botlands/
 - **process-monitor.js:** PID bazlı CPU/RAM ölçümü ve periyodik durum güncellemesi.
 - **log-manager.js:** stdout/stderr dinleme, satır bazlı akış, tampon sınırı ve log temizleme.
 - **bot-store.js:** Şema doğrulaması yapılmış bot kayıtlarını saklar.
-- **preload/index.js:** Renderer için izinli API fonksiyonlarını expose eder.
+- **preload/index.cjs:** Renderer için izinli API fonksiyonlarını expose eder.
 - **renderer/js/api.js:** UI ile preload API'si arasında tek erişim noktası.
 - **ipc/**: Kanal adları, payload doğrulama ve sender kontrolü.
 
