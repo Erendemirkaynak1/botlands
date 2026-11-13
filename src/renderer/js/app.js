@@ -6,21 +6,52 @@ const dialog = document.querySelector("#bot-dialog");
 const form = document.querySelector("#bot-form");
 const formError = document.querySelector("#form-error");
 const saveButton = document.querySelector("#save-bot-button");
+const noticeElement = document.querySelector("#app-notice");
 
 const platformNames = { win32: "Windows", darwin: "macOS", linux: "Linux" };
+const activeStates = new Set(["starting", "running", "stopping"]);
+const statuses = new Map();
+const logs = new Map();
 let bots = [];
 let editingBotId = null;
+let noticeTimer;
+
+function showNotice(message, isError = false) {
+  noticeElement.textContent = message;
+  noticeElement.classList.toggle("error", isError);
+  noticeElement.hidden = !message;
+  clearTimeout(noticeTimer);
+  if (message) noticeTimer = setTimeout(() => { noticeElement.hidden = true; }, 5000);
+}
+
+function statusFor(botId) {
+  return statuses.get(botId) ?? {
+    botId, status: "stopped", pid: null, startedAt: null, exitCode: null, signal: null, error: null
+  };
+}
 
 async function initializeDashboard() {
+  window.botlands.bots.onStatus((status) => {
+    statuses.set(status.botId, status);
+    renderBots();
+  });
+  window.botlands.bots.onLog((entry) => appendLog(entry));
+
   try {
     const info = await window.botlands.app.getInfo();
     versionElement.textContent = `v${info.version}`;
     platformElement.textContent = platformNames[info.platform] ?? info.platform;
     document.title = `Botlands v${info.version}`;
-    await refreshBots();
+    const [savedBots, currentStatuses] = await Promise.all([
+      window.botlands.bots.list(),
+      window.botlands.bots.getStatuses()
+    ]);
+    bots = savedBots;
+    for (const status of currentStatuses) statuses.set(status.botId, status);
+    renderBots();
   } catch (error) {
     versionElement.textContent = "App info unavailable";
-    showError(error);
+    showNotice(error.message || "Could not initialize the workspace.", true);
   }
 }
 
@@ -40,14 +71,19 @@ function renderBots() {
   botListElement.replaceChildren();
   emptyStateElement.hidden = bots.length > 0;
 
+  const runningCount = bots.filter((bot) => statusFor(bot.id).status === "running").length;
   const enabledCount = bots.filter((bot) => bot.enabled).length;
   document.querySelector("#total-bots").textContent = String(bots.length);
-  document.querySelector("#running-bots").textContent = "0";
+  document.querySelector("#running-bots").textContent = String(runningCount);
   document.querySelector("#stopped-bots").textContent = String(enabledCount);
-  document.querySelector("#list-count").textContent = `${bots.length} configured`;\n  document.querySelector("#nav-bot-count").textContent = String(bots.length);
+  document.querySelector("#list-count").textContent = `${bots.length} configured`;
+  document.querySelector("#nav-bot-count").textContent = String(bots.length);
 
   for (const bot of bots) {
+    const runtime = statusFor(bot.id);
     const card = createElement("article", "bot-card");
+    card.dataset.botId = bot.id;
+
     const identity = createElement("div", "bot-identity");
     const icon = createElement("div", "bot-avatar", bot.name.slice(0, 1).toUpperCase());
     const details = createElement("div", "bot-details");
@@ -59,27 +95,63 @@ function renderBots() {
 
     const status = createElement(
       "span",
-      bot.enabled ? "bot-status configured" : "bot-status disabled",
-      bot.enabled ? "Configured" : "Disabled"
+      `bot-status status-${runtime.status}`,
+      bot.enabled ? runtime.status : "disabled"
     );
 
     const actions = createElement("div", "bot-actions");
+    const busy = activeStates.has(runtime.status);
     actions.append(
-      actionButton("Edit", "edit", bot.id, "subtle"),
-      actionButton(bot.enabled ? "Disable" : "Enable", "toggle", bot.id, "subtle"),
-      actionButton("Remove", "remove", bot.id, "danger")
+      actionButton("Start", "start", bot.id, "success", !bot.enabled || busy),
+      actionButton("Stop", "stop", bot.id, "subtle", !busy),
+      actionButton("Restart", "restart", bot.id, "subtle", !bot.enabled || !busy),
+      actionButton("Edit", "edit", bot.id, "subtle", busy),
+      actionButton(bot.enabled ? "Disable" : "Enable", "toggle", bot.id, "subtle", busy),
+      actionButton("Remove", "remove", bot.id, "danger", busy)
     );
-    card.append(identity, status, actions);
+
+    const meta = createElement("div", "bot-meta");
+    meta.textContent = runtime.pid
+      ? `PID ${runtime.pid} · Started ${new Date(runtime.startedAt ?? Date.now()).toLocaleTimeString()}`
+      : runtime.error ? runtime.error : runtime.exitCode !== null ? `Exited with code ${runtime.exitCode}` : "Not running";
+
+    const outputDetails = createElement("details", "bot-logs");
+    const summary = createElement("summary", "", "Live output");
+    const output = createElement("pre", "bot-log-output");
+    output.dataset.logOutput = bot.id;
+    output.textContent = (logs.get(bot.id) ?? []).map(formatLog).join("\n");
+    outputDetails.append(summary, output);
+
+    card.append(identity, status, actions, meta, outputDetails);
     botListElement.append(card);
   }
 }
 
-function actionButton(label, action, id, style) {
+function actionButton(label, action, id, style, disabled = false) {
   const button = createElement("button", `small-button ${style}`, label);
   button.type = "button";
   button.dataset.action = action;
   button.dataset.id = id;
+  button.disabled = disabled;
   return button;
+}
+
+function formatLog(entry) {
+  const time = new Date(entry.timestamp).toLocaleTimeString();
+  return `[${time}] [${entry.stream.toUpperCase()}] ${entry.line}`;
+}
+
+function appendLog(entry) {
+  const entries = logs.get(entry.botId) ?? [];
+  entries.push(entry);
+  if (entries.length > 300) entries.splice(0, entries.length - 300);
+  logs.set(entry.botId, entries);
+
+  const output = botListElement.querySelector(`[data-log-output="${CSS.escape(entry.botId)}"]`);
+  if (output) {
+    output.textContent = entries.map(formatLog).join("\n");
+    output.scrollTop = output.scrollHeight;
+  }
 }
 
 function openDialog(bot = null) {
@@ -93,7 +165,7 @@ function openDialog(bot = null) {
     form.elements.namedItem("name").value = bot.name;
     form.elements.namedItem("cwd").value = bot.cwd;
     form.elements.namedItem("executable").value = bot.executable;
-    form.elements.args.value = bot.args.join("\n");
+    form.elements.namedItem("args").value = bot.args.join("\n");
   }
 
   dialog.showModal();
@@ -104,11 +176,6 @@ function closeDialog() {
   dialog.close();
   editingBotId = null;
   formError.textContent = "";
-}
-
-function showError(error) {
-  console.error(error);
-  formError.textContent = error instanceof Error ? error.message : "Something went wrong. Please try again.";
 }
 
 document.querySelector("#add-bot-button").addEventListener("click", () => openDialog());
@@ -141,15 +208,13 @@ form.addEventListener("submit", async (event) => {
   };
 
   try {
-    if (editingBotId) {
-      await window.botlands.bots.update(editingBotId, input);
-    } else {
-      await window.botlands.bots.create(input);
-    }
+    if (editingBotId) await window.botlands.bots.update(editingBotId, input);
+    else await window.botlands.bots.create(input);
     closeDialog();
     await refreshBots();
+    showNotice(editingBotId ? "Bot configuration updated." : "Bot added to your workspace.");
   } catch (error) {
-    showError(error);
+    formError.textContent = error.message || "Could not save this bot.";
   } finally {
     saveButton.disabled = false;
   }
@@ -163,21 +228,39 @@ botListElement.addEventListener("click", async (event) => {
 
   button.disabled = true;
   try {
-    if (button.dataset.action === "edit") {
-      openDialog(bot);
-    } else if (button.dataset.action === "toggle") {
-      await window.botlands.bots.setEnabled(bot.id, !bot.enabled);
-      await refreshBots();
-    } else if (button.dataset.action === "remove") {
-      if (window.confirm(`Remove "${bot.name}" from Botlands? This does not delete its files.`)) {
-        await window.botlands.bots.remove(bot.id);
+    switch (button.dataset.action) {
+      case "start":
+        await window.botlands.bots.start(bot.id);
+        showNotice(`${bot.name} started.`);
+        break;
+      case "stop":
+        await window.botlands.bots.stop(bot.id);
+        showNotice(`${bot.name} stopped.`);
+        break;
+      case "restart":
+        await window.botlands.bots.restart(bot.id);
+        showNotice(`${bot.name} restarted.`);
+        break;
+      case "edit":
+        openDialog(bot);
+        break;
+      case "toggle":
+        await window.botlands.bots.setEnabled(bot.id, !bot.enabled);
         await refreshBots();
-      }
+        break;
+      case "remove":
+        if (window.confirm(`Remove "${bot.name}" from Botlands? This does not delete its files.`)) {
+          await window.botlands.bots.remove(bot.id);
+          logs.delete(bot.id);
+          statuses.delete(bot.id);
+          await refreshBots();
+        }
+        break;
     }
   } catch (error) {
-    showError(error);
+    showNotice(error.message || "The requested action failed.", true);
   } finally {
-    button.disabled = false;
+    if (button.isConnected) button.disabled = false;
   }
 });
 
