@@ -13,7 +13,7 @@ Botlands executes programs with the permissions of the current operating-system 
 
 ## IPC requirements
 
-Every privileged IPC handler must validate the sender and payload. Expose task-specific methods rather than generic channel or command execution. Keep executable paths and argument arrays separate; do not enable shell execution globally.
+Every privileged IPC handler validates the sender and payload. The preload exposes task-specific bot configuration methods rather than generic channel or command execution. Executable paths and argument arrays are stored separately; process execution is not implemented yet and must not enable shell execution globally.
 
 ## Process execution requirements
 
