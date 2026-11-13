@@ -1,5 +1,5 @@
 import { randomUUID } from "node:crypto";
-import { mkdir, readFile, rename, writeFile } from "node:fs/promises";
+import { mkdir, readFile, rename, unlink, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { validateBotId, validateBotInput } from "../utils/bot-validation.js";
 
@@ -25,7 +25,29 @@ export class BotStore {
       if (data.version !== STORE_VERSION || !Array.isArray(data.bots)) {
         throw new Error("Bot configuration file has an unsupported format.");
       }
-      return data;
+      const bots = data.bots.map((bot) => {
+        if (!bot || typeof bot !== "object" || Array.isArray(bot)) {
+          throw new Error("Bot configuration file contains an invalid record.");
+        }
+        validateBotId(bot.id);
+        const validated = validateBotInput({
+          name: bot.name,
+          cwd: bot.cwd,
+          executable: bot.executable,
+          args: bot.args,
+          enabled: bot.enabled
+        });
+        if (!Number.isFinite(Date.parse(bot.createdAt)) || !Number.isFinite(Date.parse(bot.updatedAt))) {
+          throw new Error("Bot configuration file contains invalid timestamps.");
+        }
+        return {
+          id: bot.id,
+          ...validated,
+          createdAt: bot.createdAt,
+          updatedAt: bot.updatedAt
+        };
+      });
+      return { version: STORE_VERSION, bots };
     } catch (error) {
       if (error.code === "ENOENT") return { version: STORE_VERSION, bots: [] };
       throw error;
@@ -43,7 +65,6 @@ export class BotStore {
       });
       await rename(temporaryPath, this.filePath);
     } catch (error) {
-      const { unlink } = await import("node:fs/promises");
       await unlink(temporaryPath).catch(() => {});
       throw error;
     }
