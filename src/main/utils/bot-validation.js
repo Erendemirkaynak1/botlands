@@ -53,7 +53,7 @@ export function validateBotInput(input, { partial = false } = {}) {
 }
 
 export function validateBotId(id) {
-  if (typeof id !== "string" || !/^[0-9a-f-]{36}$/i.test(id)) {
+  if (typeof id !== "string" || !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id)) {
     throw new Error("A valid bot ID is required.");
   }
   return id;
