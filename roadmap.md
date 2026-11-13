@@ -5,7 +5,7 @@
 **Durum:** İlk uygulama aşamaları geliştirildi  
 **Hedef:** Windows öncelikli, Linux ve macOS destekli güvenli ve modüler masaüstü bot yöneticisi.
 
-Bu belge MVP kapsamını, önerilen klasör yapısını, güvenlik sınırlarını, bağımlılıkları ve geliştirme sırasını tanımlar. Mimari temel oluşturuldu; aşağıdaki işaretler depodaki mevcut uygulama durumunu gösterir.
+Bu belge MVP kapsamını, önerilen klasör yapısını, güvenlik sınırlarını, bağımlılıkları ve geliştirme sırasını tanımlar. Mimari temel, bot kayıtları ve ilk süreç yönetimi akışı depoya eklendi; aşağıdaki işaretler mevcut uygulama durumunu gösterir.
 
 ---
 
@@ -15,17 +15,17 @@ Kullanıcı, kendi bilgisayarında bulunan farklı teknolojilerle yazılmış ye
 
 ### MVP fonksiyonları
 
-- [ ] Bot ekleme, düzenleme, silme ve devre dışı bırakma
+- [x] Bot ekleme, düzenleme, silme ve devre dışı bırakma
 - [ ] Bot tanımı: ad, çalışma dizini, executable, argüman listesi, ortam değişkenleri
-- [ ] Start / Stop / Restart
-- [ ] Durum: stopped, starting, running, stopping, exited, errored, disabled
-- [ ] PID, başlangıç zamanı ve çalışma süresi
-- [ ] stdout ve stderr canlı log akışı
+- [x] Start / Stop / Restart
+- [x] Durum: stopped, starting, running, stopping, errored, disabled
+- [x] PID ve başlangıç zamanı
+- [x] stdout ve stderr canlı log akışı
 - [ ] Log tamponu sınırı ve temizleme/indirilebilir log
 - [ ] Temel CPU ve RAM ölçümü
 - [ ] Uygulama kapanırken çalışan botlar için kullanıcı tercihi (çalışır bırak / durdur / onay sor)
-- [ ] Windows, Linux ve macOS için süreç başlatma/durdurma adaptörleri
-- [ ] Yerel JSON tabanlı yapılandırma
+- [x] shell:false süreç başlatma ve tree-kill tabanlı süreç ağacı sonlandırma
+- [x] Yerel JSON tabanlı yapılandırma
 - [ ] Hata mesajları, doğrulama ve boş durum arayüzleri
 
 ### MVP dışında (sonraki sürümler)
@@ -348,8 +348,8 @@ Forge tabanlı temel script'ler:
 - [ ] Durum makinesi ve PID takibi
 - [ ] stdout/stderr akışı
 - [ ] Spawn error ve exit code işleme
-- [ ] Alt süreçleri sonlandırma
-- [ ] Aynı botta eşzamanlı lifecycle çağrılarını engelleme
+- [x] Alt süreçleri sonlandırma
+- [x] Aynı botta eşzamanlı lifecycle çağrılarını sıraya alma
 
 **Kabul:** Python/Node örnek botları başlatılır, logları görünür ve kapatıldığında süreç ağacı kalıntı bırakmaz.
 
