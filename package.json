@@ -23,5 +23,8 @@
     "@electron-forge/maker-squirrel": "^8.0.1",
     "@electron-forge/maker-zip": "^8.0.1",
     "electron": "^45.3.2"
+  },
+  "dependencies": {
+    "tree-kill": "^1.2.2"
   }
 }
