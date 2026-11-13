@@ -28,7 +28,7 @@ function showNotice(message, isError = false) {
 
 function statusFor(botId) {
   return statuses.get(botId) ?? {
-    botId, status: "stopped", pid: null, startedAt: null, exitCode: null, signal: null, error: null
+    botId, status: "stopped", pid: null, startedAt: null, exitCode: null, signal: null, error: null, processTracked: false
   };
 }
 
@@ -106,11 +106,12 @@ function renderBots() {
     );
 
     const actions = createElement("div", "bot-actions");
-    const busy = activeStates.has(runtime.status);
+    const busy = activeStates.has(runtime.status) || runtime.processTracked;
+    const canStop = activeStates.has(runtime.status) || runtime.processTracked;
     actions.append(
       actionButton("Start", "start", bot.id, "success", !bot.enabled || busy),
-      actionButton("Stop", "stop", bot.id, "subtle", !busy),
-      actionButton("Restart", "restart", bot.id, "subtle", !bot.enabled || !busy),
+      actionButton("Stop", "stop", bot.id, "subtle", !canStop),
+      actionButton("Restart", "restart", bot.id, "subtle", !bot.enabled || !canStop),
       actionButton("Edit", "edit", bot.id, "subtle", busy),
       actionButton(bot.enabled ? "Disable" : "Enable", "toggle", bot.id, "subtle", busy),
       actionButton("Remove", "remove", bot.id, "danger", busy)
