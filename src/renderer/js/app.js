@@ -51,6 +51,8 @@ async function initializeDashboard() {
     bots = savedBots;
     for (const status of currentStatuses) statuses.set(status.botId, status);
     renderBots();
+    const metrics = await window.botlands.system.getMetrics();
+    if (metrics) applyMetrics(metrics);
   } catch (error) {
     versionElement.textContent = "App info unavailable";
     showNotice(error.message || "Could not initialize the workspace.", true);
@@ -113,19 +115,13 @@ function renderBots() {
     );
 
     const meta = createElement("div", "bot-meta");
-    meta.textContent = runtime.status === "starting"
-      ? "Starting process…"
-      : runtime.status === "stopping"
-        ? "Stopping process…"
-        : runtime.pid && runtime.startedAt
-          ? `PID ${runtime.pid} · Started ${new Date(runtime.startedAt).toLocaleTimeString()}`
-          : runtime.error
-            ? runtime.error
-            : runtime.exitCode !== null
-              ? `Exited with code ${runtime.exitCode}`
-              : runtime.signal
-                ? `Stopped by ${runtime.signal}`
-                : "Not running";
+    meta.dataset.uptimeFor = bot.id;
+    meta.textContent = formatBotMeta(runtime);
+
+    const resource = createElement("div", "bot-resource", "Waiting for resource metrics…");
+    resource.dataset.resourceFor = bot.id;
+    const metric = resourceMetrics.get(bot.id);
+    if (metric) resource.textContent = formatResourceMetric(metric);
 
     const outputDetails = createElement("details", "bot-logs");
     const summary = createElement("summary", "", "Live output");
