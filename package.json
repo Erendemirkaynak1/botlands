@@ -1,0 +1,27 @@
+{
+  "name": "botlands",
+  "version": "0.1.0",
+  "private": true,
+  "description": "A cross-platform desktop control center for local bots and automation processes.",
+  "author": "Botlands Contributors",
+  "license": "MIT",
+  "type": "module",
+  "main": "src/main/index.js",
+  "engines": {
+    "node": ">=22.17.0"
+  },
+  "scripts": {
+    "start": "electron-forge start",
+    "package": "electron-forge package",
+    "make": "electron-forge make",
+    "test": "node --test"
+  },
+  "devDependencies": {
+    "@electron-forge/cli": "^8.0.1",
+    "@electron-forge/maker-deb": "^8.0.1",
+    "@electron-forge/maker-dmg": "^8.0.1",
+    "@electron-forge/maker-squirrel": "^8.0.1",
+    "@electron-forge/maker-zip": "^8.0.1",
+    "electron": "^45.3.2"
+  }
+}
