@@ -93,7 +93,7 @@ app.whenReady().then(() => {
       const detail = [
         "Some bot processes may still be running:",
         ...failures.map((message) => `• ${message}`)
-      ].join("\\n");
+      ].join("\n");
 
       try {
         const { response } = await dialog.showMessageBox(mainWindow ?? undefined, {
