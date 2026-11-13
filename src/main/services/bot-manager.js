@@ -53,8 +53,14 @@ export class BotManager extends EventEmitter {
       startedAt: runtime.startedAt ?? null,
       exitCode: runtime.exitCode ?? null,
       signal: runtime.signal ?? null,
-      error: runtime.error ?? null
+      error: runtime.error ?? null,
+      processTracked: Boolean(runtime.child)
     };
+  }
+
+  hasTrackedProcess(botId) {
+    validateBotId(botId);
+    return Boolean(this.processes.get(botId)?.child);
   }
 
   publishStatus(runtime) {
