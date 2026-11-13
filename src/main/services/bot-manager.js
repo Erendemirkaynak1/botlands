@@ -34,6 +34,7 @@ export class BotManager extends EventEmitter {
     this.stopTimeoutMs = stopTimeoutMs;
     this.processes = new Map();
     this.queues = new Map();
+    this.shuttingDown = false;
   }
 
   serialize(id, operation) {
@@ -93,6 +94,7 @@ export class BotManager extends EventEmitter {
 
   async start(botId) {
     validateBotId(botId);
+    if (this.shuttingDown) throw new Error("Botlands is shutting down; new bot processes cannot be started.");
     return this.serialize(botId, () => this.startUnlocked(botId));
   }
 
@@ -242,13 +244,21 @@ export class BotManager extends EventEmitter {
 
   async restart(botId) {
     validateBotId(botId);
+    if (this.shuttingDown) throw new Error("Botlands is shutting down; bots cannot be restarted.");
     return this.serialize(botId, async () => {
       await this.stopUnlocked(this.processes.get(botId));
       return this.startUnlocked(botId);
     });
   }
 
+  resume() {
+    this.shuttingDown = false;
+  }
+
   async stopAll() {
+    this.shuttingDown = true;
+    // Let lifecycle operations already accepted finish before taking the shutdown snapshot.
+    await Promise.allSettled([...this.queues.values()]);
     const activeIds = [...this.processes.values()]
       .filter((runtime) => runtime.child)
       .map((runtime) => runtime.botId);
