@@ -47,6 +47,29 @@ test("updates, disables and removes a bot", async () => {
   });
 });
 
+test("rejects duplicate IDs and invalid enabled flags in persisted data", async () => {
+  await withStore(async (store) => {
+    const created = await store.create(sampleBot);
+    const raw = await (await import("node:fs/promises")).readFile(store.filePath, "utf8");
+    const data = JSON.parse(raw);
+    data.bots.push({ ...data.bots[0] });
+    await (await import("node:fs/promises")).writeFile(store.filePath, JSON.stringify(data));
+    await assert.rejects(store.list(), /duplicate bot IDs/);
+
+    data.bots = [{ ...created, enabled: "yes" }];
+    await (await import("node:fs/promises")).writeFile(store.filePath, JSON.stringify(data));
+    await assert.rejects(store.list(), /invalid enabled flag/);
+  });
+});
+
+test("rejects oversized persisted configuration files", async () => {
+  await withStore(async (store) => {
+    const { writeFile } = await import("node:fs/promises");
+    await writeFile(store.filePath, "x".repeat(5 * 1024 * 1024 + 1));
+    await assert.rejects(store.list(), /maximum supported size/);
+  });
+});
+
 test("serializes concurrent writes without losing bot records", async () => {
   await withStore(async (store) => {
     await Promise.all(
