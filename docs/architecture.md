@@ -16,8 +16,8 @@ The current foundation creates a secure BrowserWindow and exposes a narrow `wind
 
 - `BotStore`: validated local bot configuration.
 - `BotManager`: process lifecycle and state transitions. Implemented in `src/main/services/bot-manager.js`.
-- `ProcessMonitor`: PID, uptime, CPU and memory sampling.
-- `LogManager`: bounded stdout/stderr buffers.
+- `ProcessMonitor`: system-wide and per-bot CPU/RAM sampling every three seconds. Implemented in `src/main/services/process-monitor.js`.
+- `LogManager`: bounded stdout/stderr buffers in the renderer; Main emits bounded log chunks and preserves partial lines.
 - `IPC handlers`: request validation, sender checks and response shaping.
 
 Services should remain independent of the renderer and should be testable without launching Electron wherever practical.
