@@ -10,12 +10,12 @@ Botlands uses Electron's three-part process model:
 
 ## Current implementation
 
-The current foundation creates a secure BrowserWindow and exposes a narrow `window.botlands` API. The renderer can read app information and perform bot configuration CRUD operations. `BotStore` serializes writes, persists versioned JSON under Electron's user data directory, validates records on read, and uses a temporary file plus rename for safer writes.
+The current foundation creates a secure BrowserWindow and exposes a narrow `window.botlands` API. The renderer can read app information, manage bot configuration, and invoke start/stop/restart actions. `BotStore` serializes writes, persists versioned JSON under Electron's user data directory, validates records on read, and uses a temporary file plus rename for safer writes. `BotManager` serializes lifecycle operations per bot, validates the working directory, launches executable/argument arrays with `shell: false`, tracks PID and state, streams stdout/stderr events, and terminates process trees through `tree-kill`. Active processes are stopped when the application exits.
 
 ## Planned service boundaries
 
 - `BotStore`: validated local bot configuration.
-- `BotManager`: process lifecycle and state transitions.
+- `BotManager`: process lifecycle and state transitions. Implemented in `src/main/services/bot-manager.js`.
 - `ProcessMonitor`: PID, uptime, CPU and memory sampling.
 - `LogManager`: bounded stdout/stderr buffers.
 - `IPC handlers`: request validation, sender checks and response shaping.
