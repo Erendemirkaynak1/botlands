@@ -128,3 +128,16 @@ test("reports bot shutdown failures instead of silently ignoring them", async (t
     return true;
   });
 });
+
+
+test("does not launch a duplicate while an errored child is still tracked", async (t) => {
+  const { bot, manager } = await setup(t, ["-e", "process.exit(0)"]);
+  manager.processes.set(bot.id, {
+    botId: bot.id,
+    status: "errored",
+    child: {},
+    pid: 12345
+  });
+
+  await assert.rejects(manager.start(bot.id), /already errored/);
+});
