@@ -63,7 +63,7 @@
               <h1>Good to see you.</h1>
               <p class="page-description">Everything you run, organized in one place.</p>
             </div>
-            <button class="primary-button" type="button" disabled title="Coming in the next development phase">
+            <button class="primary-button" id="add-bot-button" type="button">
               <span>＋</span> Add a bot <kbd>⌘ K</kbd>
             </button>
           </div>
@@ -71,17 +71,17 @@
           <div class="stats-grid" aria-label="Workspace statistics">
             <article class="stat-card">
               <div class="stat-top"><span>Total bots</span><span class="stat-symbol">⌘</span></div>
-              <div class="stat-value">0</div>
+              <div class="stat-value" id="total-bots">0</div>
               <div class="stat-foot">No configurations yet</div>
             </article>
             <article class="stat-card">
               <div class="stat-top"><span>Running</span><span class="status-dot"></span></div>
-              <div class="stat-value">0</div>
+              <div class="stat-value" id="running-bots">0</div>
               <div class="stat-foot">Active processes</div>
             </article>
             <article class="stat-card">
               <div class="stat-top"><span>Stopped</span><span class="stat-symbol muted">Ⅱ</span></div>
-              <div class="stat-value">0</div>
+              <div class="stat-value" id="stopped-bots">0</div>
               <div class="stat-foot">Waiting to be started</div>
             </article>
             <article class="stat-card">
@@ -93,20 +93,39 @@
 
           <section class="section-heading">
             <div><h2>Your bots</h2><p>Manage and monitor your local processes.</p></div>
-            <button class="text-button" type="button" disabled>View all <span>→</span></button>
+            <span class="list-count" id="list-count">0 configured</span>
           </section>
 
-          <section class="empty-state">
+          <section class="bot-list" id="bot-list" aria-live="polite"></section>
+          <section class="empty-state" id="empty-state">
             <div class="empty-illustration" aria-hidden="true">
               <div class="orbit orbit-one"></div><div class="orbit orbit-two"></div>
               <div class="empty-core"><span>⌘</span></div>
               <span class="orbit-node node-one"></span><span class="orbit-node node-two"></span><span class="orbit-node node-three"></span>
             </div>
             <h3>Your workspace is ready</h3>
-            <p>Once bot management is enabled, your bots will appear here.<br />Add a program to start building your control center.</p>
-            <button class="secondary-button" type="button" disabled>＋ Add your first bot</button>
-            <span class="coming-soon">BOT MANAGEMENT IS COMING IN THE NEXT PHASE</span>
+            <p>Add your first program to start building your control center.<br />Your bot configurations are stored locally on this device.</p>
+            <button class="secondary-button" id="empty-add-button" type="button">＋ Add your first bot</button>
+            <span class="coming-soon">YOUR LOCAL WORKSPACE · PRIVATE BY DESIGN</span>
           </section>
+
+          <dialog class="bot-dialog" id="bot-dialog" aria-labelledby="dialog-title">
+            <form id="bot-form" class="bot-form">
+              <div class="dialog-header">
+                <div><span class="eyebrow">BOT CONFIGURATION</span><h2 id="dialog-title">Add a bot</h2></div>
+                <button class="icon-button" id="close-dialog" type="button" aria-label="Close">×</button>
+              </div>
+              <label>Bot name<input name="name" required maxlength="80" placeholder="My Discord bot" /></label>
+              <label>Working directory<input name="cwd" required maxlength="2048" placeholder="C:\\Projects\\my-bot" /></label>
+              <label>Executable<input name="executable" required maxlength="2048" placeholder="node, python, or full executable path" /></label>
+              <label>Arguments <span class="field-hint">One argument per line</span><textarea name="args" rows="4" placeholder="index.js"></textarea></label>
+              <p class="form-error" id="form-error" role="alert"></p>
+              <div class="dialog-actions">
+                <button class="secondary-button" id="cancel-dialog" type="button">Cancel</button>
+                <button class="primary-button" id="save-bot-button" type="submit">Save bot</button>
+              </div>
+            </form>
+          </dialog>
 
           <footer class="page-footer">
             <span>Built for the things you run.</span>
