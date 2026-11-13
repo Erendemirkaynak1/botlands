@@ -10,7 +10,7 @@ Botlands uses Electron's three-part process model:
 
 ## Current implementation
 
-The first foundation release creates a single secure BrowserWindow and exposes only `window.botlands.app.getInfo()`. The dashboard reads the app version and operating system through that API.
+The current foundation creates a secure BrowserWindow and exposes a narrow `window.botlands` API. The renderer can read app information and perform bot configuration CRUD operations. `BotStore` serializes writes, persists versioned JSON under Electron's user data directory, validates records on read, and uses a temporary file plus rename for safer writes.
 
 ## Planned service boundaries
 
