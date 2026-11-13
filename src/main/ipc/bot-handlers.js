@@ -1,6 +1,6 @@
 import { validateBotId } from "../utils/bot-validation.js";
 
-export function registerBotHandlers(ipcMain, getMainWindow, botStore, botManager) {
+export function registerBotHandlers(ipcMain, getMainWindow, botStore, botManager, processMonitor) {
   const assertTrustedSender = (event) => {
     const window = getMainWindow();
     if (!window || event.sender !== window.webContents || event.senderFrame !== event.sender.mainFrame) {
@@ -15,6 +15,7 @@ export function registerBotHandlers(ipcMain, getMainWindow, botStore, botManager
 
   botManager.on("status", (status) => publishToRenderer("bots:status", status));
   botManager.on("log", (entry) => publishToRenderer("bots:log", entry));
+  processMonitor.on("metrics", (snapshot) => publishToRenderer("system:metrics", snapshot));
 
   ipcMain.handle("bots:list", async (event) => {
     assertTrustedSender(event);
@@ -56,7 +57,7 @@ export function registerBotHandlers(ipcMain, getMainWindow, botStore, botManager
     return botStore.remove(id);
   });
 
-  ipcMain.handle("bots:get-statuses", (event) => {
+  ipcMain.handle("system:get-metrics", (event) => {\n    assertTrustedSender(event);\n    return processMonitor.getSnapshot();\n  });\n\n  ipcMain.handle("bots:get-statuses", (event) => {
     assertTrustedSender(event);
     return botManager.listStatuses();
   });
