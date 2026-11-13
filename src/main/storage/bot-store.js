@@ -1,9 +1,11 @@
 import { randomUUID } from "node:crypto";
-import { mkdir, readFile, rename, unlink, writeFile } from "node:fs/promises";
+import { mkdir, readFile, rename, stat, unlink, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { validateBotId, validateBotInput } from "../utils/bot-validation.js";
 
 const STORE_VERSION = 1;
+const MAX_STORE_BYTES = 5 * 1024 * 1024;
+const MAX_BOTS = 500;
 
 export class BotStore {
   constructor(userDataPath) {
@@ -20,16 +22,31 @@ export class BotStore {
 
   async readData() {
     try {
+      const fileStats = await stat(this.filePath);
+      if (fileStats.size > MAX_STORE_BYTES) {
+        throw new Error("Bot configuration file exceeds the maximum supported size.");
+      }
       const raw = await readFile(this.filePath, "utf8");
       const data = JSON.parse(raw);
       if (data.version !== STORE_VERSION || !Array.isArray(data.bots)) {
         throw new Error("Bot configuration file has an unsupported format.");
       }
+      if (data.bots.length > MAX_BOTS) {
+        throw new Error("Bot configuration file contains too many bot records.");
+      }
+      const seenIds = new Set();
       const bots = data.bots.map((bot) => {
         if (!bot || typeof bot !== "object" || Array.isArray(bot)) {
           throw new Error("Bot configuration file contains an invalid record.");
         }
         validateBotId(bot.id);
+        if (seenIds.has(bot.id)) {
+          throw new Error("Bot configuration file contains duplicate bot IDs.");
+        }
+        seenIds.add(bot.id);
+        if (typeof bot.enabled !== "boolean") {
+          throw new Error("Bot configuration file contains an invalid enabled flag.");
+        }
         const validated = validateBotInput({
           name: bot.name,
           cwd: bot.cwd,
