@@ -17,7 +17,7 @@ export class ProcessMonitor extends EventEmitter {
     this.provider = provider;
     this.intervalMs = intervalMs;
     this.timer = null;
-    this.sampling = false;
+    this.samplingGeneration = null;
     this.lastSnapshot = null;
     this.generation = 0;
   }
@@ -42,9 +42,9 @@ export class ProcessMonitor extends EventEmitter {
   }
 
   async sample() {
-    if (this.sampling) return this.lastSnapshot;
-    this.sampling = true;
     const generation = this.generation;
+    if (this.samplingGeneration === generation) return this.lastSnapshot;
+    this.samplingGeneration = generation;
     try {
       const active = this.botManager.listStatuses()
         .filter((item) => item.status === "running" && item.pid);
@@ -87,7 +87,7 @@ export class ProcessMonitor extends EventEmitter {
       }
       return this.lastSnapshot;
     } finally {
-      this.sampling = false;
+      if (this.samplingGeneration === generation) this.samplingGeneration = null;
     }
   }
 }
