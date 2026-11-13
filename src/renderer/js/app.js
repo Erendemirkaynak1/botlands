@@ -73,19 +73,37 @@ function createElement(tag, className, text) {
   return element;
 }
 
+function getVisibleBots() {
+  const query = document.querySelector("#bot-search").value.trim().toLocaleLowerCase();
+  const filter = document.querySelector("#bot-status-filter").value;
+  return bots.filter((bot) => {
+    const runtime = statusFor(bot.id);
+    const matchesQuery = !query || [
+      bot.name, bot.executable, bot.cwd, ...bot.args
+    ].join(" ").toLocaleLowerCase().includes(query);
+    const matchesStatus = filter === "all" ||
+      (filter === "disabled" ? !bot.enabled : bot.enabled && runtime.status === filter);
+    return matchesQuery && matchesStatus;
+  });
+}
+
 function renderBots() {
   botListElement.replaceChildren();
   emptyStateElement.hidden = bots.length > 0;
+  const visibleBots = getVisibleBots();
+  document.querySelector("#filter-empty").hidden = bots.length === 0 || visibleBots.length > 0;
 
   const runningCount = bots.filter((bot) => statusFor(bot.id).status === "running").length;
   const enabledCount = bots.filter((bot) => bot.enabled).length;
   document.querySelector("#total-bots").textContent = String(bots.length);
   document.querySelector("#running-bots").textContent = String(runningCount);
   document.querySelector("#enabled-bots").textContent = String(enabledCount);
-  document.querySelector("#list-count").textContent = `${bots.length} configured`;
+  document.querySelector("#list-count").textContent = visibleBots.length === bots.length
+    ? `${bots.length} configured`
+    : `${visibleBots.length} of ${bots.length} shown`;
   document.querySelector("#nav-bot-count").textContent = String(bots.length);
 
-  for (const bot of bots) {
+  for (const bot of visibleBots) {
     const runtime = statusFor(bot.id);
     const card = createElement("article", "bot-card");
     card.dataset.botId = bot.id;
@@ -101,7 +119,7 @@ function renderBots() {
 
     const status = createElement(
       "span",
-      `bot-status status-${runtime.status}`,
+      `bot-status status-${bot.enabled ? runtime.status : "disabled"}`,
       bot.enabled ? runtime.status : "disabled"
     );
 
@@ -243,6 +261,9 @@ document.querySelector("#add-bot-button").addEventListener("click", () => openDi
 document.querySelector("#empty-add-button").addEventListener("click", () => openDialog());
 document.querySelector("#close-dialog").addEventListener("click", closeDialog);
 document.querySelector("#cancel-dialog").addEventListener("click", closeDialog);
+
+document.querySelector("#bot-search").addEventListener("input", renderBots);
+document.querySelector("#bot-status-filter").addEventListener("change", renderBots);
 
 window.addEventListener("keydown", (event) => {
   if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "k") {
